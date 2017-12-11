@@ -24,8 +24,6 @@ sys.path.append(here)
 sys.path.append(os.path.join(here, '..', 'CIFAR10'))
 import cifar10 as cf
 
-
-
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('log-frequency', 10,
                             'Number of steps between logging results to the console and saving summaries. (default: %(default)d)')
@@ -109,30 +107,14 @@ def main(_):
 
     cifar = cf.cifar10(batchSize=FLAGS.batch_size)
 
-
     # Build the graph for the deep net
     with tf.name_scope('inputs'):
-        isTesting = tf.placeholder(tf.float32);
-
         x = tf.placeholder(tf.float32, [None, cifar.IMG_WIDTH * cifar.IMG_HEIGHT * cifar.IMG_CHANNELS])
         x_image = tf.reshape(x, [-1, cifar.IMG_WIDTH, cifar.IMG_HEIGHT, cifar.IMG_CHANNELS])
         y_ = tf.placeholder(tf.float32, [None, cifar.CLASS_COUNT])
 
-        # horiz_x_image = tf.image.random_flip_left_right(x_image);
-        # horiz_x_image = tf.map_fn(tf.image.random_flip_left_right, x_image);
-
-        augmented_x_image = tf.map_fn(tf.image.random_flip_left_right, x_image);
-        augmented_x_image = tf.map_fn(lambda x: tf.image.random_brightness(x, max_delta=63), augmented_x_image);
-        augmented_x_image = tf.map_fn(lambda x: tf.image.random_contrast(x, lower=0.2, upper=1.8), augmented_x_image);
-
-        # distorted_image = tf.image.random_brightness(horiz_x_image, max_delta=63)
-        # distorted_image = tf.image.random_contrast(distorted_image, lower=0.2, upper=1.8)
-
-        condImage = tf.cond(tf.equal(isTesting, 0), lambda: augmented_x_image, lambda: x_image);
-
-
     with tf.name_scope('model'):
-        y_conv = deepnn(condImage)
+        y_conv = deepnn(x_image)
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
     correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
@@ -173,12 +155,12 @@ def main(_):
             (testImages, testLabels) = cifar.getTestBatch()
 
             _, train_summary_str = sess.run([train_step, train_summary],
-                                      feed_dict={x: trainImages, y_: trainLabels, isTesting: 0})
+                                      feed_dict={x: trainImages, y_: trainLabels})
 
             # Validation: Monitoring accuracy using validation set
             if (step + 1) % FLAGS.log_frequency == 0:
                 validation_accuracy, validation_summary_str = sess.run([accuracy, validation_summary],
-                                                                       feed_dict={x: testImages, y_: testLabels, isTesting: 1})
+                                                                       feed_dict={x: testImages, y_: testLabels})
                 print('step {}, accuracy on validation set : {}'.format(step, validation_accuracy))
                 train_writer.add_summary(train_summary_str, step)
                 validation_writer.add_summary(validation_summary_str, step)
@@ -201,7 +183,7 @@ def main(_):
         while evaluated_images != cifar.nTestSamples:
             # Don't loop back when we reach the end of the test set
             (testImages, testLabels) = cifar.getTestBatch(allowSmallerBatches=True)
-            test_accuracy_temp = sess.run(accuracy, feed_dict={x: testImages, y_: testLabels, isTesting: 1})
+            test_accuracy_temp = sess.run(accuracy, feed_dict={x: testImages, y_: testLabels})
 
             batch_count += 1
             test_accuracy += test_accuracy_temp
@@ -217,6 +199,3 @@ def main(_):
 
 if __name__ == '__main__':
     tf.app.run(main=main)
-
-# def rand_brightness(x_image):
-#     return tf.image.random_brightness(x_image, 1)

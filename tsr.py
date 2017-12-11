@@ -27,6 +27,10 @@ here = os.path.dirname(__file__)
 sys.path.append(here)
 sys.path.append(os.path.join(here, '..', 'CIFAR10'))
 import cifar10 as cf
+import gtsrb
+
+for (train_images,train_labels) in gtsrb.batch_generator(data, 'train'):
+    print(train_images,train_labels)
 
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('log-frequency', 10,
@@ -201,22 +205,6 @@ def main(_):
 
         train_writer.close()
         validation_writer.close()
-
-
-def batch_generator(dataset, group, batch_size=100):
-
-	idx = 0
-	dataset_size = dataset['y_{0:s}'.format(group)].shape[0]
-	indices = range(dataset_size)
-	np.random.shuffle(indices)
-	while idx < dataset_size:
-		chunk = slice(idx, idx+batch_size)
-		chunk = indices[chunk]
-		chunk = sorted(chunk)
-		idx = idx + batch_size
-		yield dataset['X_{0:s}'.format(group)][chunk], dataset['y_{0:s}'.format(group)][chunk]
-
-
 
 if __name__ == '__main__':
     tf.app.run(main=main)

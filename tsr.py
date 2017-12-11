@@ -20,7 +20,7 @@ import os
 import tensorflow as tf
 
 
-import numpy as np,
+import numpy as np
 data = np.load('gtsrb_dataset.npz')
 
 here = os.path.dirname(__file__)

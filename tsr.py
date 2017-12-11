@@ -19,6 +19,10 @@ import os
 
 import tensorflow as tf
 
+
+import numpy as np,
+data = np.load('gtsrb_dataset.npz')
+
 here = os.path.dirname(__file__)
 sys.path.append(here)
 sys.path.append(os.path.join(here, '..', 'CIFAR10'))
@@ -106,6 +110,8 @@ def main(_):
     tf.reset_default_graph()
 
     cifar = cf.cifar10(batchSize=FLAGS.batch_size)
+
+
 
     # Build the graph for the deep net
     with tf.name_scope('inputs'):

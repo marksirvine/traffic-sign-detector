@@ -23,10 +23,10 @@ import tensorflow as tf
 import numpy as np
 data = np.load('gtsrb_dataset.npz')
 
+
 here = os.path.dirname(__file__)
 sys.path.append(here)
 sys.path.append(os.path.join(here, '..', 'CIFAR10'))
-import cifar10 as cf
 import gtsrb
 
 #(train_images,train_labels) = gtsrb.batch_generator(data, 'train').next()
@@ -118,7 +118,6 @@ def deepnn(x_image, img_shape=(32, 32, 3), class_count=CLASS_COUNT):
 def main(_):
     tf.reset_default_graph()
 
-    cifar = cf.cifar10(batchSize=FLAGS.batch_size)
     gtsrbTrain = gtsrb.batch_generator(data, 'train');
     gtsrbTest = gtsrb.batch_generator(data, 'test');
 
@@ -196,14 +195,17 @@ def main(_):
                 validation_writer.flush()
 
         # Resetting the internal batch indexes
-        cifar.reset()
         evaluated_images = 0
         test_accuracy = 0
         batch_count = 0
 
-        while evaluated_images != cifar.nTestSamples:
+        nTestSamples = 12630
+        gtsrbTest = gtsrb.batch_generator(data, 'test');
+
+        while evaluated_images != 12630:
             # Don't loop back when we reach the end of the test set
-            (testImages, testLabels) = cifar.getTestBatch(allowSmallerBatches=True)
+            #(testImages, testLabels) = cifar.getTestBatch(allowSmallerBatches=True)
+            (testImages, testLabels) = gtsrbTest.next()
             test_accuracy_temp = sess.run(accuracy, feed_dict={x: testImages, y_: testLabels})
 
             batch_count += 1

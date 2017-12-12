@@ -29,8 +29,9 @@ sys.path.append(os.path.join(here, '..', 'CIFAR10'))
 import cifar10 as cf
 import gtsrb
 
-for (train_images,train_labels) in gtsrb.batch_generator(data, 'train'):
-    print(train_images,train_labels)
+#(train_images,train_labels) = gtsrb.batch_generator(data, 'train').next()
+#print(train_images)
+#print(train_labels)
 
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('log-frequency', 10,
@@ -47,6 +48,10 @@ tf.app.flags.DEFINE_integer('max-steps', 10000,
 tf.app.flags.DEFINE_integer('batch-size', 128, 'Number of examples per mini-batch. (default: %(default)d)')
 tf.app.flags.DEFINE_float('learning-rate', 1e-3, 'Number of examples to run. (default: %(default)d)')
 
+IMG_WIDTH = 32
+IMG_HEIGHT = 32
+IMG_CHANNELS = 3
+CLASS_COUNT = 43
 
 run_log_dir = os.path.join(FLAGS.log_dir, 'exp_bs_{bs}_lr_{lr}'.format(bs=FLAGS.batch_size,
                                                                        lr=FLAGS.learning_rate))
@@ -56,7 +61,7 @@ checkpoint_path = os.path.join(run_log_dir, 'model.ckpt')
 gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.33)
 
 
-def deepnn(x_image, img_shape=(32, 32, 3), class_count=10):
+def deepnn(x_image, img_shape=(32, 32, 3), class_count=CLASS_COUNT):
     """deepnn builds the graph for a deep net for classifying CIFAR10 images.
 
     Args:
@@ -119,9 +124,9 @@ def main(_):
 
     # Build the graph for the deep net
     with tf.name_scope('inputs'):
-        x = tf.placeholder(tf.float32, [None, cifar.IMG_WIDTH * cifar.IMG_HEIGHT * cifar.IMG_CHANNELS])
-        x_image = tf.reshape(x, [-1, cifar.IMG_WIDTH, cifar.IMG_HEIGHT, cifar.IMG_CHANNELS])
-        y_ = tf.placeholder(tf.float32, [None, cifar.CLASS_COUNT])
+        x = tf.placeholder(tf.float32, [None, IMG_WIDTH * IMG_HEIGHT * IMG_CHANNELS])
+        x_image = tf.reshape(x, [-1, IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS])
+        y_ = tf.placeholder(tf.float32, [None, CLASS_COUNT])
 
     with tf.name_scope('model'):
         y_conv = deepnn(x_image)
@@ -161,16 +166,20 @@ def main(_):
 
         # Training and validation
         for step in range(FLAGS.max_steps):
-            (trainImages, trainLabels) = cifar.getTrainBatch()
-            (testImages, testLabels) = cifar.getTestBatch()
+            #(trainImages, trainLabels) = cifar.getTrainBatch()
+            #(testImages, testLabels) = cifar.getTestBatch()
+
+            (trainImages, trainLabels) = gtsrb.batch_generator(data, 'train').next()
+            (testImages, testLabels) = gtsrb.batch_generator(data, 'train').next()
+
 
             _, train_summary_str = sess.run([train_step, train_summary],
-                                      feed_dict={x: trainImages, y_: trainLabels})
+                                      feed_dict={x_image: trainImages, y_: trainLabels})
 
             # Validation: Monitoring accuracy using validation set
             if (step + 1) % FLAGS.log_frequency == 0:
                 validation_accuracy, validation_summary_str = sess.run([accuracy, validation_summary],
-                                                                       feed_dict={x: testImages, y_: testLabels})
+                                                                       feed_dict={x_image: testImages, y_: testLabels})
                 print('step {}, accuracy on validation set : {}'.format(step, validation_accuracy))
                 train_writer.add_summary(train_summary_str, step)
                 validation_writer.add_summary(validation_summary_str, step)

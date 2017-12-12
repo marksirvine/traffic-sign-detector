@@ -170,7 +170,7 @@ def main(_):
             #(testImages, testLabels) = cifar.getTestBatch()
 
             (trainImages, trainLabels) = gtsrb.batch_generator(data, 'train').next()
-            (testImages, testLabels) = gtsrb.batch_generator(data, 'train').next()
+            (testImages, testLabels) = gtsrb.batch_generator(data, 'test').next()
 
 
             _, train_summary_str = sess.run([train_step, train_summary],

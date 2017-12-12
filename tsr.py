@@ -26,7 +26,7 @@ data = np.load('gtsrb_dataset.npz')
 here = os.path.dirname(__file__)
 sys.path.append(here)
 sys.path.append(os.path.join(here, '..', 'CIFAR10'))
-# import cifar10 as cf
+import cifar10 as cf
 import gtsrb
 
 #(train_images,train_labels) = gtsrb.batch_generator(data, 'train').next()
@@ -119,8 +119,8 @@ def main(_):
     tf.reset_default_graph()
 
     cifar = cf.cifar10(batchSize=FLAGS.batch_size)
-    gtsrbTrain = batch_generator(data, 'train');
-    gtsrbTest = batch_generator(data, 'test');
+    gtsrbTrain = gtsrb.batch_generator(data, 'train');
+    gtsrbTest = gtsrb.batch_generator(data, 'test');
 
 
 

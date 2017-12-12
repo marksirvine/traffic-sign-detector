@@ -127,7 +127,7 @@ def deepnn(x_image, img_shape=(32, 32, 3), class_count=CLASS_COUNT):
         padding='same',
         name='pool3'
     )
-    pool3_flat = tf.reshape(pool3, [-1, 8 * 8 * 64], name='pool3_flattened')
+    pool3_flat = tf.reshape(pool3, [-1, 4 * 4 * 64], name='pool3_flattened')
 
     fc1 = tf.layers.dense(inputs=pool3_flat, activation=tf.nn.relu, units=1024, name='fc1')
     logits = tf.layers.dense(inputs=fc1, units=class_count, name='fc2')

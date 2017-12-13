@@ -222,7 +222,7 @@ def main(_):
         # testGenerator = gb.batch_generator(data, 'test');
 
         # while evaluated_images != 12630:
-        for (testImages, testLabels) in bg.batch_generator(dataset, 'test'):
+        for (testImages, testLabels) in bg.batch_generator(data, 'test'):
             # Don't loop back when we reach the end of the test set
             #(testImages, testLabels) = cifar.getTestBatch(allowSmallerBatches=True)
             # (testImages, testLabels) = testGenerator.next()

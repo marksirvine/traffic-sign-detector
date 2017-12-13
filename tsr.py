@@ -44,7 +44,7 @@ tf.app.flags.DEFINE_integer('save-model-frequency', 100,
 tf.app.flags.DEFINE_string('log-dir', '{cwd}/logs/'.format(cwd=os.getcwd()),
                            'Directory where to write event logs and checkpoint. (default: %(default)s)')
 # Optimisation hyperparameters
-tf.app.flags.DEFINE_integer('max-steps', 10000,
+tf.app.flags.DEFINE_integer('max-steps', 1000,
                             'Number of mini-batches to train on. (default: %(default)d)')
 tf.app.flags.DEFINE_integer('batch-size', 128, 'Number of examples per mini-batch. (default: %(default)d)')
 tf.app.flags.DEFINE_float('learning-rate', 1e-3, 'Number of examples to run. (default: %(default)d)')
@@ -219,12 +219,13 @@ def main(_):
         batch_count = 0
 
         nTestSamples = 12630
-        testGenerator = gb.batch_generator(data, 'test');
+        # testGenerator = gb.batch_generator(data, 'test');
 
-        while evaluated_images != 12630:
+        # while evaluated_images != 12630:
+        for (testImages, testLabels) in gb.batch_generator(dataset, 'test'):
             # Don't loop back when we reach the end of the test set
             #(testImages, testLabels) = cifar.getTestBatch(allowSmallerBatches=True)
-            (testImages, testLabels) = testGenerator.next()
+            # (testImages, testLabels) = testGenerator.next()
             test_accuracy_temp = sess.run(accuracy, feed_dict={x: testImages, y_: testLabels})
 
             batch_count += 1

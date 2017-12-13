@@ -98,7 +98,7 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
     #4
     conv2 = tf.layers.conv2d(
         inputs=pool1,
-        filters=64,
+        filters=32,
         kernel_size=[5, 5],
         padding='same',
         activation=tf.nn.relu,
@@ -133,7 +133,7 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
     )
     #8
     pool3_flat = tf.reshape(pool3, [-1, 4 * 4 * 64], name='pool3_flattened')
-    fc1 = tf.layers.dense(inputs=pool3_flat, activation=tf.nn.relu, units=64, name='fc1')
+    fc1 = tf.layers.dense(inputs=pool3_flat, units=64, name='fc1')
     #9
     logits = tf.layers.dense(inputs=fc1, units=class_count, name='fc2')
     return logits

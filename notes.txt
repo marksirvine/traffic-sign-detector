@@ -1,0 +1,1 @@
+- Adding batch normalization seems to increase accuracy

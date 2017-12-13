@@ -1,3 +1,5 @@
+import numpy as np
+
 def batch_generator(dataset, group, batch_size=100):
 
 	idx = 0

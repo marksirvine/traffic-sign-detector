@@ -21,13 +21,14 @@ import tensorflow as tf
 
 
 import numpy as np
-data = np.load('gtsrb_dataset.npz')
+import cPickle as pickle
+data = pickle.load(open('dataset.pkl','rb'))
 
 
 here = os.path.dirname(__file__)
 sys.path.append(here)
 sys.path.append(os.path.join(here, '..', 'CIFAR10'))
-import gtsrb
+import batch_generator as bg
 
 #(train_images,train_labels) = gtsrb.batch_generator(data, 'train').next()
 #print(train_images)
@@ -137,8 +138,8 @@ def deepnn(x_image, img_shape=(32, 32, 3), class_count=CLASS_COUNT):
 def main(_):
     tf.reset_default_graph()
 
-    gtsrbTrain = gtsrb.batch_generator(data, 'train');
-    gtsrbTest = gtsrb.batch_generator(data, 'test');
+    trainGenerator = bg.batch_generator(data, 'train');
+    testGenerator = bg.batch_generator(data, 'test');
 
 
 
@@ -189,8 +190,8 @@ def main(_):
             #(trainImages, trainLabels) = cifar.getTrainBatch()
             #(testImages, testLabels) = cifar.getTestBatch()
 
-            (trainImages, trainLabels) = gtsrbTrain.next()
-            (testImages, testLabels) = gtsrbTest.next()
+            (trainImages, trainLabels) = trainGenerator.next()
+            (testImages, testLabels) = testGenerator.next()
 
 
             _, train_summary_str = sess.run([train_step, train_summary],
@@ -219,12 +220,12 @@ def main(_):
         batch_count = 0
 
         nTestSamples = 12630
-        gtsrbTest = gtsrb.batch_generator(data, 'test');
+        testGenerator = gb.batch_generator(data, 'test');
 
         while evaluated_images != 12630:
             # Don't loop back when we reach the end of the test set
             #(testImages, testLabels) = cifar.getTestBatch(allowSmallerBatches=True)
-            (testImages, testLabels) = gtsrbTest.next()
+            (testImages, testLabels) = testGenerator.next()
             test_accuracy_temp = sess.run(accuracy, feed_dict={x: testImages, y_: testLabels})
 
             batch_count += 1

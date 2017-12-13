@@ -162,7 +162,7 @@ def main(_):
 
     global_step = tf.Variable(0, trainable=False)  # this will be incremented automatically by tensorflow
     decay_steps = 1000  # decay the learning rate every 1000 steps
-    decay_rate = 0.1  # the base of our exponential for the decay
+    decay_rate = 0.8  # the base of our exponential for the decay
     decayed_learning_rate = tf.train.exponential_decay(FLAGS.learning_rate, global_step,
                                decay_steps, decay_rate, staircase=True)
 

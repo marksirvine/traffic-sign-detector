@@ -231,7 +231,7 @@ def main(_):
 
             batch_count += 1
             test_accuracy += test_accuracy_temp
-            evaluated_images += testLabels.shape[0]
+            # evaluated_images += testLabels.shape[0]
 
         test_accuracy = test_accuracy / batch_count
         print('test set: accuracy on test set: %0.3f' % test_accuracy)

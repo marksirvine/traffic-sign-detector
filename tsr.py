@@ -174,7 +174,7 @@ def main(_):
 
     global_step = tf.Variable(0, trainable=False)  # this will be incremented automatically by tensorflow
     decay_steps = 1000  # decay the learning rate every 1000 steps
-    decay_rate = 0.8  # the base of our exponential for the decay
+    decay_rate = 0.1  # the base of our exponential for the decay
     decayed_learning_rate = tf.train.exponential_decay(FLAGS.learning_rate, global_step,
                                decay_steps, decay_rate, staircase=True)
 
@@ -184,7 +184,8 @@ def main(_):
     # See https://www.tensorflow.org/api_docs/python/tf/layers/batch_normalization for more
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
-        train_step = tf.train.AdamOptimizer(decayed_learning_rate).minimize(cross_entropy, global_step=global_step)
+        # train_step = tf.train.AdamOptimizer(decayed_learning_rate).minimize(cross_entropy, global_step=global_step)
+        train_step = tf.train.MomentumOptimizer(decayed_learning_rate, 0.9).minimize(cross_entropy,global_step=global_step)
 
     loss_summary = tf.summary.scalar("Loss", cross_entropy)
     accuracy_summary = tf.summary.scalar("Accuracy", accuracy)

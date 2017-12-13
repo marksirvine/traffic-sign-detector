@@ -190,12 +190,14 @@ def main(_):
             #(trainImages, trainLabels) = cifar.getTrainBatch()
             #(testImages, testLabels) = cifar.getTestBatch()
 
-            (trainImages, trainLabels) = trainGenerator.next()
-            (testImages, testLabels) = testGenerator.next()
+            #(trainImages, trainLabels) = trainGenerator.next()
+            #(testImages, testLabels) = testGenerator.next()
+            for (trainImages, trainLabels) in bg.batch_generator(data, 'train'):
 
-
-            _, train_summary_str = sess.run([train_step, train_summary],
+                _, train_summary_str = sess.run([train_step, train_summary],
                                       feed_dict={x_image: trainImages, y_: trainLabels})
+
+            (testImages, testLabels) = bg.batch_generator(data, 'test').next()
 
             # Validation: Monitoring accuracy using validation set
             if (step + 1) % FLAGS.log_frequency == 0:

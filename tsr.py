@@ -172,8 +172,8 @@ def main(_):
     # See https://www.tensorflow.org/api_docs/python/tf/layers/batch_normalization for more
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
-        # train_step = tf.train.AdamOptimizer(decayed_learning_rate).minimize(cross_entropy, global_step=global_step)
-        train_step = tf.train.MomentumOptimizer(decayed_learning_rate, 0.9).minimize(cross_entropy,global_step=global_step)
+        train_step = tf.train.AdamOptimizer(decayed_learning_rate).minimize(cross_entropy, global_step=global_step)
+        # train_step = tf.train.MomentumOptimizer(decayed_learning_rate, 0.9).minimize(cross_entropy,global_step=global_step)
 
     loss_summary = tf.summary.scalar("Loss", cross_entropy)
     accuracy_summary = tf.summary.scalar("Accuracy", accuracy)

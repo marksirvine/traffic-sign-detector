@@ -226,8 +226,8 @@ def main(_):
             # Don't loop back when we reach the end of the test set
             #(testImages, testLabels) = cifar.getTestBatch(allowSmallerBatches=True)
             # (testImages, testLabels) = testGenerator.next()
-            print(testImages.shape)
-            test_accuracy_temp = sess.run(accuracy, feed_dict={x: testImages, y_: testLabels})
+
+            test_accuracy_temp = sess.run(accuracy, feed_dict={x_image: testImages, y_: testLabels})
 
             batch_count += 1
             test_accuracy += test_accuracy_temp

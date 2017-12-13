@@ -77,6 +77,7 @@ def deepnn(x_image, img_shape=(32, 32, 3), class_count=CLASS_COUNT):
     """
 
     # First convolutional layer - maps one RGB image to 32 feature maps.
+    #2
     conv1 = tf.layers.conv2d(
         inputs=x_image,
         filters=32,
@@ -86,6 +87,7 @@ def deepnn(x_image, img_shape=(32, 32, 3), class_count=CLASS_COUNT):
         name='conv1'
     )
     conv1_bn = tf.nn.relu(tf.layers.batch_normalization(conv1))
+    #3
     pool1 = tf.layers.average_pooling2d(
         inputs=conv1_bn,
         pool_size=[3, 3],
@@ -93,7 +95,7 @@ def deepnn(x_image, img_shape=(32, 32, 3), class_count=CLASS_COUNT):
         padding="same",
         name='pool1'
     )
-
+    #4
     conv2 = tf.layers.conv2d(
         inputs=pool1,
         filters=64,
@@ -104,6 +106,7 @@ def deepnn(x_image, img_shape=(32, 32, 3), class_count=CLASS_COUNT):
         name='conv2'
     )
     conv2_bn = tf.nn.relu(tf.layers.batch_normalization(conv2))
+    #5
     pool2 = tf.layers.average_pooling2d(
         inputs=conv2_bn,
         pool_size=[3, 3],
@@ -111,6 +114,7 @@ def deepnn(x_image, img_shape=(32, 32, 3), class_count=CLASS_COUNT):
         padding='same',
         name='pool2'
     )
+    #6
     conv3 = tf.layers.conv2d(
         inputs=pool2,
         filters=64,
@@ -121,6 +125,7 @@ def deepnn(x_image, img_shape=(32, 32, 3), class_count=CLASS_COUNT):
         name='conv3'
     )
     conv3_bn = tf.nn.relu(tf.layers.batch_normalization(conv3))
+    #7
     pool3 = tf.layers.max_pooling2d(
         inputs=conv3_bn,
         pool_size=[3, 3],
@@ -128,9 +133,20 @@ def deepnn(x_image, img_shape=(32, 32, 3), class_count=CLASS_COUNT):
         padding='same',
         name='pool3'
     )
-    pool3_flat = tf.reshape(pool3, [-1, 4 * 4 * 64], name='pool3_flattened')
-
-    fc1 = tf.layers.dense(inputs=pool3_flat, activation=tf.nn.relu, units=1024, name='fc1')
+    #8
+    conv4 = tf.layers.conv2d(
+        inputs=pool3,
+        filters=64,
+        kernel_size=[4, 4],
+        padding='same',
+        #activation=tf.nn.relu,
+        use_bias=False,
+        name='conv4'
+    )
+    conv4_bn = tf.nn.relu(tf.layers.batch_normalization(conv4))
+    #9
+    conv4_bn_flat = tf.reshape(conv4_bn, [-1, 4 * 4 * 64], name='conv4_bn_flattened')
+    fc1 = tf.layers.dense(inputs=conv4_bn_flat, activation=tf.nn.relu, units=1024, name='fc1')
     logits = tf.layers.dense(inputs=fc1, units=class_count, name='fc2')
     return logits
 

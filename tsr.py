@@ -44,7 +44,7 @@ tf.app.flags.DEFINE_integer('save-model-frequency', 100,
 tf.app.flags.DEFINE_string('log-dir', '{cwd}/logs/'.format(cwd=os.getcwd()),
                            'Directory where to write event logs and checkpoint. (default: %(default)s)')
 # Optimisation hyperparameters
-tf.app.flags.DEFINE_integer('max-steps', 10000,
+tf.app.flags.DEFINE_integer('max-steps', 1000,
                             'Number of mini-batches to train on. (default: %(default)d)')
 tf.app.flags.DEFINE_integer('batch-size', 128, 'Number of examples per mini-batch. (default: %(default)d)')
 tf.app.flags.DEFINE_float('learning-rate', 1e-3, 'Number of examples to run. (default: %(default)d)')
@@ -194,7 +194,7 @@ def main(_):
     reg_constant = 0.0005  # Choose an appropriate one.
 
 
-    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) + weights_norm
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) #+ weights_norm
 
     cross_entropy = cross_entropy + reg_constant * sum(reg_losses)
 

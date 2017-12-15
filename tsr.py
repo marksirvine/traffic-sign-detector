@@ -177,7 +177,7 @@ def main(_):
     #   reg_constant = 0.01  # Choose an appropriate one.
     #   loss = my_normal_loss + reg_constant * sum(reg_losses)
 
-    Add the weight decay loss to another collection called losses
+    # Add the weight decay loss to another collection called losses
     tf.add_to_collection('losses', weights_norm)
 
     # Add the other loss components to the collection losses

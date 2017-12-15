@@ -166,12 +166,12 @@ def main(_):
       #
       #
     with tf.variable_scope('weights_norm') as scope:
-    weights_norm = tf.reduce_sum(
-      input_tensor = 0.0005*tf.pack(
-          [tf.nn.l2_loss(i) for i in tf.get_collection('weights')]
-      ),
-      name='weights_norm'
-    )
+        weights_norm = tf.reduce_sum(
+          input_tensor = 0.0005*tf.pack(
+              [tf.nn.l2_loss(i) for i in tf.get_collection('weights')]
+          ),
+          name='weights_norm'
+        )
 
     #   reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
     #   reg_constant = 0.01  # Choose an appropriate one.

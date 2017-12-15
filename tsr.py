@@ -54,6 +54,8 @@ IMG_HEIGHT = 32
 IMG_CHANNELS = 3
 CLASS_COUNT = 43
 
+weight_decay = 0.0005
+
 run_log_dir = os.path.join(FLAGS.log_dir, 'exp_bs_{bs}_lr_{lr}'.format(bs=FLAGS.batch_size,
                                                                        lr=FLAGS.learning_rate))
 checkpoint_path = os.path.join(run_log_dir, 'model.ckpt')
@@ -184,19 +186,19 @@ def main(_):
       # To calculate your total loss
     #   tf.add_n(tf.get_collection('losses'), name='total_loss')
 
-    # regularizer = tf.contrib.layers.l2_regularizer(scale=0.1)
-    # weights = tf.get_variable(
-    #     name="weights",
-    #     regularizer=regularizer
-    # )
+    regularizer = tf.contrib.layers.l2_regularizer(scale=0.0005)
+    weights = tf.get_variable(
+        name="weights",
+        regularizer=regularizer
+    )
 
     reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
-    reg_constant = 0.0005  # Choose an appropriate one.
+    # reg_constant = 0.0005  # Choose an appropriate one.
 
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) #+ weights_norm
 
-    cross_entropy = cross_entropy + reg_constant * sum(reg_losses)
+    cross_entropy = cross_entropy + reg_losses
 
     correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name='accuracy')

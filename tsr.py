@@ -136,6 +136,8 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
     fc1 = tf.layers.dense(inputs=pool3_flat, units=64, name='fc1')
     #9
     logits = tf.layers.dense(inputs=fc1, units=class_count, name='fc2')
+
+
     return logits
 
 
@@ -156,12 +158,51 @@ def main(_):
     with tf.name_scope('model'):
         y_conv = deepnn(x_image)
 
-    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
+
+    #   # Create your variables
+    #   weights = tf.get_variable('weights', collections=['variables'])
+      #
+      #
+    #   with tf.variable_scope('weights_norm') as scope:
+    #     weights_norm = tf.reduce_sum(
+    #       input_tensor = 0.0005*tf.pack(
+    #           [tf.nn.l2_loss(i) for i in tf.get_collection('weights')]
+    #       ),
+    #       name='weights_norm'
+    #   )
+      #
+    #   reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    #   reg_constant = 0.01  # Choose an appropriate one.
+    #   loss = my_normal_loss + reg_constant * sum(reg_losses)
+
+      # Add the weight decay loss to another collection called losses
+    #   tf.add_to_collection('losses', weights_norm)
+
+      # Add the other loss components to the collection losses
+      # ...
+
+      # To calculate your total loss
+    #   tf.add_n(tf.get_collection('losses'), name='total_loss')
+
+    # regularizer = tf.contrib.layers.l2_regularizer(scale=0.1)
+    # weights = tf.get_variable(
+    #     name="weights",
+    #     regularizer=regularizer
+    # )
+
+    reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    reg_constant = 0.0005  # Choose an appropriate one.
+
+
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) + weights_norm
+
+    cross_entropy = cross_entropy + reg_constant * sum(reg_losses)
+
     correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name='accuracy')
 
     global_step = tf.Variable(0, trainable=False)  # this will be incremented automatically by tensorflow
-    decay_steps = 1000  # decay the learning rate every 1000 steps
+    decay_steps = 100000  # decay the learning rate every 100000 steps
     decay_rate = 0.8  # the base of our exponential for the decay
     decayed_learning_rate = tf.train.exponential_decay(FLAGS.learning_rate, global_step,
                                decay_steps, decay_rate, staircase=True)
@@ -172,6 +213,10 @@ def main(_):
     # See https://www.tensorflow.org/api_docs/python/tf/layers/batch_normalization for more
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
+
+        # weight_decay = tf.constant(0.0005, dtype=tf.float32) # your weight decay rate, must be a scalar tensor.
+        # W = tf.get_variable(name='weight', shape=x_image, regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
+
         train_step = tf.train.AdamOptimizer(decayed_learning_rate).minimize(cross_entropy, global_step=global_step)
         # train_step = tf.train.MomentumOptimizer(decayed_learning_rate, 0.9).minimize(cross_entropy,global_step=global_step)
 
@@ -200,6 +245,8 @@ def main(_):
 
             _, train_summary_str = sess.run([train_step, train_summary],
                                       feed_dict={x_image: trainImages, y_: trainLabels})
+
+
 
             # Validation: Monitoring accuracy using validation set
             if (step + 1) % FLAGS.log_frequency == 0:

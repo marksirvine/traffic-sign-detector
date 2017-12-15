@@ -162,43 +162,44 @@ def main(_):
 
 
     #   # Create your variables
-    #   weights = tf.get_variable('weights', collections=['variables'])
+      weights = tf.get_variable('weights', collections=['variables'])
       #
       #
-    #   with tf.variable_scope('weights_norm') as scope:
-    #     weights_norm = tf.reduce_sum(
-    #       input_tensor = 0.0005*tf.pack(
-    #           [tf.nn.l2_loss(i) for i in tf.get_collection('weights')]
-    #       ),
-    #       name='weights_norm'
-    #   )
-      #
+      with tf.variable_scope('weights_norm') as scope:
+        weights_norm = tf.reduce_sum(
+          input_tensor = 0.0005*tf.pack(
+              [tf.nn.l2_loss(i) for i in tf.get_collection('weights')]
+          ),
+          name='weights_norm'
+      )
+
     #   reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
     #   reg_constant = 0.01  # Choose an appropriate one.
     #   loss = my_normal_loss + reg_constant * sum(reg_losses)
 
-      # Add the weight decay loss to another collection called losses
-    #   tf.add_to_collection('losses', weights_norm)
+      Add the weight decay loss to another collection called losses
+      tf.add_to_collection('losses', weights_norm)
 
       # Add the other loss components to the collection losses
-      # ...
+      tf.add_to_collection('losses', cross_entropy)
 
-      # To calculate your total loss
-    #   tf.add_n(tf.get_collection('losses'), name='total_loss')
+    #   To calculate your total loss
 
-    regularizer = tf.contrib.layers.l2_regularizer(scale=0.0005)
-    weights = tf.get_variable(
-        name="weights",
-        regularizer=regularizer
-    )
 
-    reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    # regularizer = tf.contrib.layers.l2_regularizer(scale=0.0005)
+    # weights = tf.get_variable(
+    #     name="weights",
+    #     regularizer=regularizer
+    # )
+
+    # reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
     # reg_constant = 0.0005  # Choose an appropriate one.
 
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) #+ weights_norm
 
-    cross_entropy = cross_entropy + reg_losses
+    # cross_entropy = cross_entropy + reg_losses
+    tf.add_n(tf.get_collection('losses'), name='total_loss')
 
     correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name='accuracy')

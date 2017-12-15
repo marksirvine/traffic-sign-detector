@@ -163,12 +163,13 @@ def main(_):
 
     #   # Create your variables
     weights = tf.get_variable('weights', collections=['variables'])
+    W = tf.get_variable(name='weight', shape=x_image, regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
       #
       #
     with tf.variable_scope('weights_norm') as scope:
         weights_norm = tf.reduce_sum(
           input_tensor = 0.0005*tf.pack(
-              [tf.nn.l2_loss(i) for i in tf.get_collection('weights')]
+              [tf.nn.l2_loss(i) for i in tf.get_collection('W')]
           ),
           name='weights_norm'
         )

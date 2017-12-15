@@ -162,26 +162,26 @@ def main(_):
 
 
     #   # Create your variables
-      weights = tf.get_variable('weights', collections=['variables'])
+    weights = tf.get_variable('weights', collections=['variables'])
       #
       #
-      with tf.variable_scope('weights_norm') as scope:
-        weights_norm = tf.reduce_sum(
-          input_tensor = 0.0005*tf.pack(
-              [tf.nn.l2_loss(i) for i in tf.get_collection('weights')]
-          ),
-          name='weights_norm'
-      )
+    with tf.variable_scope('weights_norm') as scope:
+    weights_norm = tf.reduce_sum(
+      input_tensor = 0.0005*tf.pack(
+          [tf.nn.l2_loss(i) for i in tf.get_collection('weights')]
+      ),
+      name='weights_norm'
+    )
 
     #   reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
     #   reg_constant = 0.01  # Choose an appropriate one.
     #   loss = my_normal_loss + reg_constant * sum(reg_losses)
 
-      Add the weight decay loss to another collection called losses
-      tf.add_to_collection('losses', weights_norm)
+    Add the weight decay loss to another collection called losses
+    tf.add_to_collection('losses', weights_norm)
 
-      # Add the other loss components to the collection losses
-      tf.add_to_collection('losses', cross_entropy)
+    # Add the other loss components to the collection losses
+    tf.add_to_collection('losses', cross_entropy)
 
     #   To calculate your total loss
 

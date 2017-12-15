@@ -197,10 +197,10 @@ def main(_):
     # reg_constant = 0.0005  # Choose an appropriate one.
 
 
-    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) + W
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) + tf.reduce_sum(W)
 
     # cross_entropy = cross_entropy + reg_losses
-    tf.add_n(tf.get_collection('losses'), name='total_loss')
+    # tf.add_n(tf.get_collection('losses'), name='total_loss')
 
     correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name='accuracy')

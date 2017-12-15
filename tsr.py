@@ -199,7 +199,7 @@ def main(_):
 
     # tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES);
     # prinf(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES))
-    trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+    # trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) #+ weights_norm
 
@@ -256,7 +256,7 @@ def main(_):
             _, train_summary_str = sess.run([train_step, train_summary],
                                       feed_dict={x_image: trainImages, y_: trainLabels})
 
-            print(trainVariables)
+            # print(trainVariables)
 
 
             # Validation: Monitoring accuracy using validation set

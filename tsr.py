@@ -18,17 +18,20 @@ import sys
 import os
 
 import tensorflow as tf
-
+import batch_generator as bg
 
 import numpy as np
+# import _pickle as pickle
 import cPickle as pickle
+
 data = pickle.load(open('dataset.pkl','rb'))
+# data = open('dataset.pkl','rb')
 
 
 here = os.path.dirname(__file__)
 sys.path.append(here)
 sys.path.append(os.path.join(here, '..', 'CIFAR10'))
-import batch_generator as bg
+
 
 #(train_images,train_labels) = gtsrb.batch_generator(data, 'train').next()
 #print(train_images)
@@ -187,7 +190,7 @@ def main(_):
     #   To calculate your total loss
 
 
-    # regularizer = tf.contrib.layers.l2_regularizer(scale=0.0005)
+
     # weights = tf.get_variable(
     #     name="weights",
     #     regularizer=regularizer
@@ -199,7 +202,8 @@ def main(_):
 
     # tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES);
     # prinf(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES))
-    # trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+
+
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) #+ weights_norm
 
@@ -221,6 +225,7 @@ def main(_):
     # are added as a dependency, this ensures that we update the mean and variance of the batch normalisation
     # layers
     # See https://www.tensorflow.org/api_docs/python/tf/layers/batch_normalization for more
+    trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
 
@@ -228,7 +233,11 @@ def main(_):
         # W = tf.get_variable(name='weight', shape=x_image, regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
 
         # train_step = tf.train.AdamOptimizer(decayed_learning_rate).minimize(cross_entropy, global_step=global_step)
+
+        regularizer = tf.contrib.layers.l2_regularizer(scale=0.0005)
+        tf.contrib.layers.apply_regularization(regularizer, trainVariables)
         train_step = tf.train.MomentumOptimizer(decayed_learning_rate, 0.9).minimize(cross_entropy,global_step=global_step)
+
 
     loss_summary = tf.summary.scalar("Loss", cross_entropy)
     accuracy_summary = tf.summary.scalar("Accuracy", accuracy)

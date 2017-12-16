@@ -158,6 +158,8 @@ def main(_):
     with tf.name_scope('inputs'):
         x = tf.placeholder(tf.float32, [None, IMG_WIDTH * IMG_HEIGHT * IMG_CHANNELS])
         x_image = tf.reshape(x, [-1, IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS])
+        #whitening
+        #x_image = tf.map_fn(lambda image: tf.image.per_image_standardization(image), x_image)
         y_ = tf.placeholder(tf.float32, [None, CLASS_COUNT])
 
     with tf.name_scope('model'):

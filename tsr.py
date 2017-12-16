@@ -266,7 +266,7 @@ def main(_):
             (testImages, testLabels) = bg.batch_generator(data,'test').next()
 
             # tf.map_fn(lambda image: tf.image.per_image_standardization(image), trainImages)
-            trainImages = tf.map_fn(lambda image: tf.image.random_brightness(image, max_delta=63), trainImages)
+            # trainImages = tf.map_fn(lambda image: tf.image.random_brightness(image, max_delta=63), trainImages)
             # tf.image.per_image_standardization(trainImages)
             _, train_summary_str = sess.run([train_step, train_summary],
                                       feed_dict={x_image: trainImages, y_: trainLabels})

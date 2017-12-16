@@ -47,7 +47,7 @@ tf.app.flags.DEFINE_integer('save-model-frequency', 100,
 tf.app.flags.DEFINE_string('log-dir', '{cwd}/logs/'.format(cwd=os.getcwd()),
                            'Directory where to write event logs and checkpoint. (default: %(default)s)')
 # Optimisation hyperparameters
-tf.app.flags.DEFINE_integer('max-steps', 10000,
+tf.app.flags.DEFINE_integer('max-steps', 500,
                             'Number of mini-batches to train on. (default: %(default)d)')
 tf.app.flags.DEFINE_integer('batch-size', 128, 'Number of examples per mini-batch. (default: %(default)d)')
 tf.app.flags.DEFINE_float('learning-rate', 1e-3, 'Number of examples to run. (default: %(default)d)')
@@ -160,6 +160,7 @@ def main(_):
         x_image = tf.reshape(x, [-1, IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS])
         y_ = tf.placeholder(tf.float32, [None, CLASS_COUNT])
 
+
     with tf.name_scope('model'):
         y_conv = deepnn(x_image)
 
@@ -216,10 +217,10 @@ def main(_):
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name='accuracy')
 
     global_step = tf.Variable(0, trainable=False)  # this will be incremented automatically by tensorflow
-    decay_steps = 10000000  # decay the learning rate every 100000 steps
-    decay_rate = 0.8  # the base of our exponential for the decay
-    decayed_learning_rate = tf.train.exponential_decay(FLAGS.learning_rate, global_step,
-                               decay_steps, decay_rate, staircase=True)
+    # decay_steps = 10000000  # decay the learning rate every 100000 steps
+    # decay_rate = 0.8  # the base of our exponential for the decay
+    # decayed_learning_rate = tf.train.exponential_decay(FLAGS.learning_rate, global_step,
+                            #    decay_steps, decay_rate, staircase=True)
 
     # We need to update the dependencies of the minimization op so that it all ops in the `UPDATE_OPS`
     # are added as a dependency, this ensures that we update the mean and variance of the batch normalisation
@@ -234,14 +235,14 @@ def main(_):
 
         # train_step = tf.train.AdamOptimizer(decayed_learning_rate).minimize(cross_entropy, global_step=global_step)
 
-        regularizer = tf.contrib.layers.l2_regularizer(scale=0.0005)
-        tf.contrib.layers.apply_regularization(regularizer, trainVariables)
-        train_step = tf.train.MomentumOptimizer(decayed_learning_rate, 0.9).minimize(cross_entropy,global_step=global_step)
+        # regularizer = tf.contrib.layers.l2_regularizer(scale=0.0005)
+        # tf.contrib.layers.apply_regularization(regularizer, trainVariables)
+        train_step = tf.train.MomentumOptimizer(FLAGS.learning_rate, 0.9).minimize(cross_entropy,global_step=global_step)
 
 
     loss_summary = tf.summary.scalar("Loss", cross_entropy)
     accuracy_summary = tf.summary.scalar("Accuracy", accuracy)
-    learning_rate_summary = tf.summary.scalar("Learning Rate", decayed_learning_rate)
+    learning_rate_summary = tf.summary.scalar("Learning Rate", FLAGS.learning_rate)
     img_summary = tf.summary.image('input images', x_image)
 
     train_summary = tf.summary.merge([loss_summary, accuracy_summary, learning_rate_summary, img_summary])
@@ -262,6 +263,9 @@ def main(_):
             (trainImages, trainLabels) = bg.batch_generator(data,'train').next()
             (testImages, testLabels) = bg.batch_generator(data,'test').next()
 
+            # tf.map_fn(lambda image: tf.image.per_image_standardization(image), trainImages)
+            trainImages = tf.map_fn(lambda image: tf.image.random_brightness(image, max_delta=63), trainImages)
+            # tf.image.per_image_standardization(trainImages)
             _, train_summary_str = sess.run([train_step, train_summary],
                                       feed_dict={x_image: trainImages, y_: trainLabels})
 

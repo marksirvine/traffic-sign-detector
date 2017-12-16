@@ -49,7 +49,7 @@ tf.app.flags.DEFINE_string('log-dir', '{cwd}/logs/'.format(cwd=os.getcwd()),
 # Optimisation hyperparameters
 tf.app.flags.DEFINE_integer('max-steps', 500,
                             'Number of mini-batches to train on. (default: %(default)d)')
-tf.app.flags.DEFINE_integer('batch-size', 128, 'Number of examples per mini-batch. (default: %(default)d)')
+tf.app.flags.DEFINE_integer('batch-size', 100, 'Number of examples per mini-batch. (default: %(default)d)')
 tf.app.flags.DEFINE_float('learning-rate', 1e-3, 'Number of examples to run. (default: %(default)d)')
 
 IMG_WIDTH = 32
@@ -158,6 +158,8 @@ def main(_):
     with tf.name_scope('inputs'):
         x = tf.placeholder(tf.float32, [None, IMG_WIDTH * IMG_HEIGHT * IMG_CHANNELS])
         x_image = tf.reshape(x, [-1, IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS])
+        #whitening
+        #x_image = tf.map_fn(lambda image: tf.image.per_image_standardization(image), x_image)
         y_ = tf.placeholder(tf.float32, [None, CLASS_COUNT])
 
 

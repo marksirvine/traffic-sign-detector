@@ -20,22 +20,15 @@ import os
 import tensorflow as tf
 import batch_generator as bg
 
-import numpy as np
-# import _pickle as pickle
 import cPickle as pickle
 
 data = pickle.load(open('dataset.pkl','rb'))
-# data = open('dataset.pkl','rb')
-
 
 here = os.path.dirname(__file__)
 sys.path.append(here)
 sys.path.append(os.path.join(here, '..', 'CIFAR10'))
 
 
-#(train_images,train_labels) = gtsrb.batch_generator(data, 'train').next()
-#print(train_images)
-#print(train_labels)
 
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('log-frequency', 10,
@@ -47,11 +40,12 @@ tf.app.flags.DEFINE_integer('save-model-frequency', 100,
 tf.app.flags.DEFINE_string('log-dir', '{cwd}/logs/'.format(cwd=os.getcwd()),
                            'Directory where to write event logs and checkpoint. (default: %(default)s)')
 # Optimisation hyperparameters
-tf.app.flags.DEFINE_integer('max-steps', 10000,
+tf.app.flags.DEFINE_integer('max-steps', 100,
                             'Number of mini-batches to train on. (default: %(default)d)')
 tf.app.flags.DEFINE_integer('batch-size', 100, 'Number of examples per mini-batch. (default: %(default)d)')
 tf.app.flags.DEFINE_float('learning-rate', 1e-3, 'Number of examples to run. (default: %(default)d)')
 
+#Image info
 IMG_WIDTH = 32
 IMG_HEIGHT = 32
 IMG_CHANNELS = 3
@@ -142,17 +136,11 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
     #9
     logits = tf.layers.dense(inputs=fc1, units=class_count, name='fc2')
 
-
     return logits
 
 
 def main(_):
     tf.reset_default_graph()
-
-    trainGenerator = bg.batch_generator(data, 'train');
-    testGenerator = bg.batch_generator(data, 'test');
-
-
 
     # Build the graph for the deep net
     with tf.name_scope('inputs'):
@@ -215,11 +203,13 @@ def main(_):
     # cross_entropy = cross_entropy + reg_losses
     # tf.add_n(tf.get_collection('losses'), name='total_loss')
 
+
+    #accuracy and error
     correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name='accuracy')
-
     incorrect_prediction = tf.not_equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
     error = tf.reduce_mean(tf.cast(incorrect_prediction, tf.float32), name='error')
+
 
     global_step = tf.Variable(0, trainable=False)  # this will be incremented automatically by tensorflow
     # decay_steps = 10000000  # decay the learning rate every 100000 steps
@@ -245,6 +235,7 @@ def main(_):
         train_step = tf.train.MomentumOptimizer(FLAGS.learning_rate, 0.9).minimize(cross_entropy,global_step=global_step)
 
 
+    #tensorboard summaries
     loss_summary = tf.summary.scalar("Loss", cross_entropy)
     accuracy_summary = tf.summary.scalar("Accuracy", accuracy)
     error_summary = tf.summary.scalar("Error", error)
@@ -254,30 +245,30 @@ def main(_):
     train_summary = tf.summary.merge([loss_summary, accuracy_summary, error_summary, learning_rate_summary, img_summary])
     validation_summary = tf.summary.merge([loss_summary, accuracy_summary, error_summary])
 
+    #create saver to save checkpoints
     saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
+
+    #creating the session
     with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
+
         train_writer = tf.summary.FileWriter(run_log_dir + "_train", sess.graph)
         validation_writer = tf.summary.FileWriter(run_log_dir + "_validation", sess.graph)
 
         sess.run(tf.global_variables_initializer())
 
-        # Training and validation
-        for step in range(FLAGS.max_steps):
-            #(trainImages, trainLabels) = cifar.getTrainBatch()
-            #(testImages, testLabels) = cifar.getTestBatch()
 
+        #TRAINING AND VALIDATION
+        for step in range(FLAGS.max_steps):
+
+            #get the training and validation images
             (trainImages, trainLabels) = bg.batch_generator(data,'train').next()
             (testImages, testLabels) = bg.batch_generator(data,'test').next()
 
-            # tf.map_fn(lambda image: tf.image.per_image_standardization(image), trainImages)
-            # trainImages = tf.map_fn(lambda image: tf.image.random_brightness(image, max_delta=63), trainImages)
-            # tf.image.per_image_standardization(trainImages)
+            #train the CNN and get the training summary
             _, train_summary_str = sess.run([train_step, train_summary],
                                       feed_dict={x_image: trainImages, y_: trainLabels})
 
-            # print(trainVariables)
-
-
+    
             # Validation: Monitoring accuracy using validation set
             if (step + 1) % FLAGS.log_frequency == 0:
                 validation_accuracy, validation_summary_str = sess.run([accuracy, validation_summary],
@@ -295,32 +286,30 @@ def main(_):
                 train_writer.flush()
                 validation_writer.flush()
 
+
+        #TESTING
+
         # Resetting the internal batch indexes
-        evaluated_images = 0
-        test_accuracy = 0
+        test_accuracy_sum = 0
         batch_count = 0
 
-        nTestSamples = 12630
-        # testGenerator = gb.batch_generator(data, 'test');
-
-        # while evaluated_images != 12630:
+        #Test the CNN on all of the test images
         for (testImages, testLabels) in bg.batch_generator(data, 'test'):
-            # Don't loop back when we reach the end of the test set
-            #(testImages, testLabels) = cifar.getTestBatch(allowSmallerBatches=True)
-            # (testImages, testLabels) = testGenerator.next()
 
-            test_accuracy_temp = sess.run(accuracy, feed_dict={x_image: testImages, y_: testLabels})
-
+            #get the accuracy for each test batch and add it to the sum of accuracies for all batches
+            test_accuracy_sum += sess.run(accuracy, feed_dict={x_image: testImages, y_: testLabels})
             batch_count += 1
-            test_accuracy += test_accuracy_temp
-            # evaluated_images += testLabels.shape[0]
 
-        test_accuracy = test_accuracy / batch_count
+
+        #Display the overall test accuracy
+        test_accuracy = test_accuracy_sum / batch_count
         print('test set: accuracy on test set: %0.3f' % test_accuracy)
         print('model saved to ' + checkpoint_path)
 
+        #close the writers
         train_writer.close()
         validation_writer.close()
+
 
 if __name__ == '__main__':
     tf.app.run(main=main)

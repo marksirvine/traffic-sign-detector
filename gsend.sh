@@ -1,1 +1,0 @@
-scp -oProxyCommand="ssh -W %h:%p gc14768@snowy.cs.bris.ac.uk" tsr.py gc14768@bc4login.acrc.bris.ac.uk:cw

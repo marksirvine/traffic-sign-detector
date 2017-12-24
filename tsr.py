@@ -47,7 +47,7 @@ tf.app.flags.DEFINE_integer('save-model-frequency', 100,
 tf.app.flags.DEFINE_string('log-dir', '{cwd}/logs/'.format(cwd=os.getcwd()),
                            'Directory where to write event logs and checkpoint. (default: %(default)s)')
 # Optimisation hyperparameters
-tf.app.flags.DEFINE_integer('max-steps', 500,
+tf.app.flags.DEFINE_integer('max-steps', 10000,
                             'Number of mini-batches to train on. (default: %(default)d)')
 tf.app.flags.DEFINE_integer('batch-size', 100, 'Number of examples per mini-batch. (default: %(default)d)')
 tf.app.flags.DEFINE_float('learning-rate', 1e-3, 'Number of examples to run. (default: %(default)d)')
@@ -218,6 +218,9 @@ def main(_):
     correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name='accuracy')
 
+    incorrect_prediction = tf.not_equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
+    error = tf.reduce_mean(tf.cast(incorrect_prediction, tf.float32), name='error')
+
     global_step = tf.Variable(0, trainable=False)  # this will be incremented automatically by tensorflow
     # decay_steps = 10000000  # decay the learning rate every 100000 steps
     # decay_rate = 0.8  # the base of our exponential for the decay
@@ -244,11 +247,12 @@ def main(_):
 
     loss_summary = tf.summary.scalar("Loss", cross_entropy)
     accuracy_summary = tf.summary.scalar("Accuracy", accuracy)
+    error_summary = tf.summary.scalar("Error", error)
     learning_rate_summary = tf.summary.scalar("Learning Rate", FLAGS.learning_rate)
     img_summary = tf.summary.image('input images', x_image)
 
-    train_summary = tf.summary.merge([loss_summary, accuracy_summary, learning_rate_summary, img_summary])
-    validation_summary = tf.summary.merge([loss_summary, accuracy_summary])
+    train_summary = tf.summary.merge([loss_summary, accuracy_summary, error_summary, learning_rate_summary, img_summary])
+    validation_summary = tf.summary.merge([loss_summary, accuracy_summary, error_summary])
 
     saver = tf.train.Saver(tf.global_variables(), max_to_keep=1)
     with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:

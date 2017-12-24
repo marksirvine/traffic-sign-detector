@@ -31,16 +31,16 @@ sys.path.append(os.path.join(here, '..', 'CIFAR10'))
 
 
 FLAGS = tf.app.flags.FLAGS
-tf.app.flags.DEFINE_integer('log-frequency', 10,
+tf.app.flags.DEFINE_integer('log-frequency', 1,
                             'Number of steps between logging results to the console and saving summaries. (default: %(default)d)')
-tf.app.flags.DEFINE_integer('flush-frequency', 50,
+tf.app.flags.DEFINE_integer('flush-frequency', 5,
                             'Number of steps between flushing summary results. (default: %(default)d)')
-tf.app.flags.DEFINE_integer('save-model-frequency', 100,
+tf.app.flags.DEFINE_integer('save-model-frequency', 1,
                             'Number of steps between model saves. (default: %(default)d)')
 tf.app.flags.DEFINE_string('log-dir', '{cwd}/logs/'.format(cwd=os.getcwd()),
                            'Directory where to write event logs and checkpoint. (default: %(default)s)')
 # Optimisation hyperparameters
-tf.app.flags.DEFINE_integer('max-steps', 100,
+tf.app.flags.DEFINE_integer('max-steps', 50,
                             'Number of mini-batches to train on. (default: %(default)d)')
 tf.app.flags.DEFINE_integer('batch-size', 100, 'Number of examples per mini-batch. (default: %(default)d)')
 tf.app.flags.DEFINE_float('learning-rate', 1e-3, 'Number of examples to run. (default: %(default)d)')
@@ -260,20 +260,28 @@ def main(_):
         #TRAINING AND VALIDATION
         for step in range(FLAGS.max_steps):
 
-            #get the training and validation images
-            (trainImages, trainLabels) = bg.batch_generator(data,'train').next()
-            (testImages, testLabels) = bg.batch_generator(data,'test').next()
+            #perform one training epoch
+            for (trainImages, trainLabels) in bg.batch_generator(data,'train'):
 
-            #train the CNN and get the training summary
-            _, train_summary_str = sess.run([train_step, train_summary],
-                                      feed_dict={x_image: trainImages, y_: trainLabels})
+                #train the CNN and get the training summary
+                _, train_summary_str = sess.run([train_step, train_summary],
+                                            feed_dict={x_image: trainImages, y_: trainLabels})
 
     
             # Validation: Monitoring accuracy using validation set
             if (step + 1) % FLAGS.log_frequency == 0:
+
+                #get some validation images
+                (testImages, testLabels) = bg.batch_generator(data,'test').next()
+
+                #find the accuracy of the validation set
                 validation_accuracy, validation_summary_str = sess.run([accuracy, validation_summary],
                                                                        feed_dict={x_image: testImages, y_: testLabels})
+
+                #print the accuracy
                 print('step {}, accuracy on validation set : {}'.format(step, validation_accuracy))
+                
+                #add the summaries of the training and validation for tensorboard
                 train_writer.add_summary(train_summary_str, step)
                 validation_writer.add_summary(validation_summary_str, step)
 

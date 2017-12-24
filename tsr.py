@@ -271,16 +271,24 @@ def main(_):
             # Validation: Monitoring accuracy using validation set
             if (step + 1) % FLAGS.log_frequency == 0:
 
-                #get some validation images
-                (testImages, testLabels) = bg.batch_generator(data,'test').next()
+                validation_accuracy_sum = 0
+                validation_batch_count = 0
 
-                #find the accuracy of the validation set
-                validation_accuracy, validation_summary_str = sess.run([accuracy, validation_summary],
-                                                                       feed_dict={x_image: testImages, y_: testLabels})
+                #calculate the average accuracy over all of the batches in the test data
+                for (testImages, testLabels) in bg.batch_generator(data,'test'):
 
+                    #sum up each batches validation accuracy
+                    validation_accuracy_sum += sess.run(accuracy, feed_dict={x_image: testImages, y_: testLabels})
+                    validation_batch_count += 1
+
+                    validation_summary_str = sess.run(validation_summary, feed_dict={x_image: testImages, y_: testLabels})
+
+                #calculate the average validation accuracy over all of the batches
+                validation_accuracy = validation_accuracy_sum / validation_batch_count
+              
                 #print the accuracy
                 print('step {}, accuracy on validation set : {}'.format(step, validation_accuracy))
-                
+
                 #add the summaries of the training and validation for tensorboard
                 train_writer.add_summary(train_summary_str, step)
                 validation_writer.add_summary(validation_summary_str, step)

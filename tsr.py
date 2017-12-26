@@ -29,7 +29,6 @@ sys.path.append(here)
 sys.path.append(os.path.join(here, '..', 'CIFAR10'))
 
 
-
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('log-frequency', 1,
                             'Number of steps between logging results to the console and saving summaries. (default: %(default)d)')
@@ -45,14 +44,13 @@ tf.app.flags.DEFINE_integer('max-steps', 50,
 tf.app.flags.DEFINE_integer('batch-size', 100, 'Number of examples per mini-batch. (default: %(default)d)')
 tf.app.flags.DEFINE_float('learning-rate', 0.01, 'Number of examples to run. (default: %(default)d)')
 tf.app.flags.DEFINE_float('momentum', 0.9, "The momentum value used in the update rule")
+tf.app.flags.DEFINE_float('weight_decay', 0.1, "The value of the weight decay used in the update rule")
 
 #Image info
 IMG_WIDTH = 32
 IMG_HEIGHT = 32
 IMG_CHANNELS = 3
 CLASS_COUNT = 43
-
-weight_decay = 0.0005
 
 run_log_dir = os.path.join(FLAGS.log_dir, 'exp_bs_{bs}_lr_{lr}'.format(bs=FLAGS.batch_size,
                                                                        lr=FLAGS.learning_rate))
@@ -226,15 +224,11 @@ def main(_):
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
 
-        # weight_decay = tf.constant(0.0005, dtype=tf.float32) # your weight decay rate, must be a scalar tensor.
-        # W = tf.get_variable(name='weight', shape=x_image, regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
-
-        # train_step = tf.train.AdamOptimizer(decayed_learning_rate).minimize(cross_entropy, global_step=global_step)
-
-        # regularizer = tf.contrib.layers.l2_regularizer(scale=0.0005)
-        # tf.contrib.layers.apply_regularization(regularizer, trainVariables)
+        #apply the weight decay
+        #regularizer = tf.contrib.layers.l2_regularizer(scale=FLAGS.weight_decay)
+        #tf.contrib.layers.apply_regularization(regularizer, trainVariables)
+        #train using momentum
         train_step = tf.train.MomentumOptimizer(FLAGS.learning_rate, FLAGS.momentum).minimize(cross_entropy,global_step=global_step)
-
 
     #tensorboard summaries
     loss_summary = tf.summary.scalar("Loss", cross_entropy)
@@ -257,6 +251,8 @@ def main(_):
 
         sess.run(tf.global_variables_initializer())
 
+        #variable to store the previous validation accuracy
+        previous_validation_accuracy = 0.0
 
         #TRAINING AND VALIDATION
         for step in range(FLAGS.max_steps):
@@ -293,6 +289,13 @@ def main(_):
                 #add the summaries of the training and validation for tensorboard
                 train_writer.add_summary(train_summary_str, step)
                 validation_writer.add_summary(validation_summary_str, step)
+
+                if validation_accuracy < previous_validation_accuracy:
+                    print('Accuracy dropped. Reducing learning rate.')
+                    FLAGS.learning_rate = FLAGS.learning_rate / 10
+
+                print('Learning rate: {}'.format(FLAGS.learning_rate))
+                previous_validation_accuracy = validation_accuracy
 
 
             # Save the model checkpoint periodically.

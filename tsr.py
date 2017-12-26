@@ -43,7 +43,8 @@ tf.app.flags.DEFINE_string('log-dir', '{cwd}/logs/'.format(cwd=os.getcwd()),
 tf.app.flags.DEFINE_integer('max-steps', 50,
                             'Number of mini-batches to train on. (default: %(default)d)')
 tf.app.flags.DEFINE_integer('batch-size', 100, 'Number of examples per mini-batch. (default: %(default)d)')
-tf.app.flags.DEFINE_float('learning-rate', 1e-3, 'Number of examples to run. (default: %(default)d)')
+tf.app.flags.DEFINE_float('learning-rate', 0.01, 'Number of examples to run. (default: %(default)d)')
+tf.app.flags.DEFINE_float('momentum', 0.9, "The momentum value used in the update rule")
 
 #Image info
 IMG_WIDTH = 32
@@ -232,7 +233,7 @@ def main(_):
 
         # regularizer = tf.contrib.layers.l2_regularizer(scale=0.0005)
         # tf.contrib.layers.apply_regularization(regularizer, trainVariables)
-        train_step = tf.train.MomentumOptimizer(FLAGS.learning_rate, 0.9).minimize(cross_entropy,global_step=global_step)
+        train_step = tf.train.MomentumOptimizer(FLAGS.learning_rate, FLAGS.momentum).minimize(cross_entropy,global_step=global_step)
 
 
     #tensorboard summaries

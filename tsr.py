@@ -22,6 +22,8 @@ import batch_generator as bg
 
 import cPickle as pickle
 
+import scipy as scp
+
 data = pickle.load(open('dataset.pkl','rb'))
 
 here = os.path.dirname(__file__)
@@ -199,6 +201,29 @@ def main(_):
         validation_writer = tf.summary.FileWriter(run_log_dir + "_validation", sess.graph)
 
         sess.run(tf.global_variables_initializer())
+
+        trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)[0]
+
+        print(trainVariables)
+
+        filters = sess.run(trainVariables)
+
+        image = []
+        for i in range(5):
+            a = []
+            for j in range(5):
+                b = []
+                for k in range(3):
+                    b.append(filters[i][j][k][0])
+                a.append(b)
+            image.append(a)
+
+        print("original:")
+        print(filters)
+        print("image:")
+        print(image)
+
+        scp.misc.imsave('filters/first/filter.jpg', image)
 
         #variable to store the previous validation accuracy
         previous_validation_accuracy = 0.0

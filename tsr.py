@@ -202,7 +202,7 @@ def main(_):
 
         sess.run(tf.global_variables_initializer())
 
-        createFilterImages(sess)
+        #createFilterImages(sess)
 
         #variable to store the previous validation accuracy
         previous_validation_accuracy = 0.0

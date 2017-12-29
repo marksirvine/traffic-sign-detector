@@ -3,3 +3,6 @@ logs/
 *.pkl
 *.pyc
 filters/first/*
+!filters/first/.gitkeep
+filters/second/*
+!filters/second/.gitkeep

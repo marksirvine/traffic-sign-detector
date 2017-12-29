@@ -91,7 +91,7 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
     pool1 = tf.layers.average_pooling2d(
         inputs=conv1,
         pool_size=[3, 3],
-        strides=2,
+        strides=[2,2],
         padding="same",
         name='pool1'
     )
@@ -202,28 +202,7 @@ def main(_):
 
         sess.run(tf.global_variables_initializer())
 
-        trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)[0]
-
-        print(trainVariables)
-
-        filters = sess.run(trainVariables)
-
-        image = []
-        for i in range(5):
-            a = []
-            for j in range(5):
-                b = []
-                for k in range(3):
-                    b.append(filters[i][j][k][0])
-                a.append(b)
-            image.append(a)
-
-        print("original:")
-        print(filters)
-        print("image:")
-        print(image)
-
-        scp.misc.imsave('filters/first/filter.jpg', image)
+        createFilterImages(sess)
 
         #variable to store the previous validation accuracy
         previous_validation_accuracy = 0.0
@@ -303,6 +282,30 @@ def main(_):
         #close the writers
         train_writer.close()
         validation_writer.close()
+
+
+def createFilterImages(sess):
+    print("Creating filter images")
+
+    #printing the filters
+    trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)[0]
+
+    filters = sess.run(trainVariables)
+
+    for a in range(32):
+        image = []
+        for i in range(5):
+            dim1 = []
+            for j in range(5):
+                dim2 = []
+                for k in range(3):
+                    dim2.append(filters[i][j][k][a])
+                dim1.append(dim2)
+            image.append(dim1)
+
+        scp.misc.imsave("filters/first/" + str(a+1) + ".jpg", image)
+
+    print("Finished creating filter images")
 
 
 if __name__ == '__main__':

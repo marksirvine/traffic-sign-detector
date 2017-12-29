@@ -8,7 +8,7 @@
 #SBATCH -o tsr_%j.out # File to which STDOUT will be written                                                                                    
 #SBATCH -e tsr_%j.err # File to which STDERR will be written                                                                                    
 #SBATCH --mail-type=ALL # Type of email notification- BEGIN,END,FAIL,ALL                                                                             
-#SBATCH --mail-user=<ab12345>@bristol.ac.uk # Email to which notifications will be sent                                                                
+#SBATCH --mail-user=gc14768@bristol.ac.uk # Email to which notifications will be sent                                                                
 
 module add libs/tensorflow/1.2
 rm -r logs/

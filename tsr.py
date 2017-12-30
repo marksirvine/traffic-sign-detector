@@ -84,7 +84,6 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
         kernel_size=[5, 5],
         padding='same',
         activation=tf.nn.relu,
-        use_bias=False,
         name='conv1'
     )
     #3
@@ -102,7 +101,6 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
         kernel_size=[5, 5],
         padding='same',
         activation=tf.nn.relu,
-        use_bias=False,
         name='conv2'
     )
     #5
@@ -120,7 +118,6 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
         kernel_size=[5, 5],
         padding='same',
         activation=tf.nn.relu,
-        use_bias=False,
         name='conv3'
     )
     #7

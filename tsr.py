@@ -199,7 +199,16 @@ def main(_):
 
         sess.run(tf.global_variables_initializer())
 
-        #createFilterImages(sess)
+        A = [[[1,2,3],[2,2,3],[3,2,3]],
+             [[4,2,3],[5,2,3],[6,2,3]],
+             [[7,2,3],[8,2,3],[9,2,3]]]
+
+        image = tf.placeholder(tf.float32, shape=(3,3,3))
+
+        new_image = imageWhitening(image)
+
+        B = sess.run(new_image, feed_dict={image: A})
+        print(B)
 
         #variable to store the previous validation accuracy
         previous_validation_accuracy = 0.0
@@ -303,6 +312,38 @@ def createFilterImages(sess):
         scp.misc.imsave("filters/first/" + str(a+1) + ".jpg", image)
 
     print("Finished creating filter images")
+
+
+def imageWhitening(image):
+    #get each channel
+    rChannel = image[:,:,0]
+    gChannel = image[:,:,1]
+    bChannel = image[:,:,2]
+
+
+    #calculate the mean for each channel
+    rMean = tf.reduce_mean(rChannel)
+    gMean = tf.reduce_mean(gChannel)
+    bMean = tf.reduce_mean(bChannel)
+
+    one = tf.constant(1, tf.float32)
+ 
+    #calculate the standard deviation for each channel
+    rStd = tf.maximum(one, tf.keras.backend.std(rChannel))
+    gStd = tf.maximum(one, tf.keras.backend.std(gChannel))
+    bStd = tf.maximum(one, tf.keras.backend.std(bChannel))
+
+    #whitening each channel
+    rWhitened = (rChannel - rMean) / rStd
+    gWhitened = (gChannel - gMean) / gStd
+    bWhitened = (bChannel - bMean) / bStd
+
+    rWhitened = tf.stack([rWhitened],2)
+    gWhitened = tf.stack([gWhitened],2)
+    bWhitened = tf.stack([bWhitened],2)
+
+    new_image = tf.concat([rWhitened, gWhitened, bWhitened],2)
+    return new_image
 
 
 if __name__ == '__main__':

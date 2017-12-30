@@ -145,13 +145,12 @@ def main(_):
         x = tf.placeholder(tf.float32, [None, IMG_WIDTH * IMG_HEIGHT * IMG_CHANNELS])
         x_image = tf.reshape(x, [-1, IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS])
         #whitening
-        #x_image = tf.map_fn(lambda image: tf.image.per_image_standardization(image), x_image)
+        x_image = tf.map_fn(lambda image: imageWhitening(image), x_image)
         y_ = tf.placeholder(tf.float32, [None, CLASS_COUNT])
 
 
     with tf.name_scope('model'):
         y_conv = deepnn(x_image)
-
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) #+ weights_norm
 
@@ -199,16 +198,6 @@ def main(_):
 
         sess.run(tf.global_variables_initializer())
 
-        A = [[[1,2,3],[2,2,3],[3,2,3]],
-             [[4,2,3],[5,2,3],[6,2,3]],
-             [[7,2,3],[8,2,3],[9,2,3]]]
-
-        image = tf.placeholder(tf.float32, shape=(3,3,3))
-
-        new_image = imageWhitening(image)
-
-        B = sess.run(new_image, feed_dict={image: A})
-        print(B)
 
         #variable to store the previous validation accuracy
         previous_validation_accuracy = 0.0
@@ -329,9 +318,9 @@ def imageWhitening(image):
     one = tf.constant(1, tf.float32)
  
     #calculate the standard deviation for each channel
-    rStd = tf.maximum(one, tf.keras.backend.std(rChannel))
-    gStd = tf.maximum(one, tf.keras.backend.std(gChannel))
-    bStd = tf.maximum(one, tf.keras.backend.std(bChannel))
+    rStd = tf.maximum(one, tf.contrib.keras.backend.std(rChannel))
+    gStd = tf.maximum(one, tf.contrib.keras.backend.std(gChannel))
+    bStd = tf.maximum(one, tf.contrib.keras.backend.std(bChannel))
 
     #whitening each channel
     rWhitened = (rChannel - rMean) / rStd

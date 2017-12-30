@@ -150,7 +150,7 @@ def main(_):
 
 
     with tf.name_scope('model'):
-        y_conv = deepnn(whitenedImages)
+        y_conv = deepnn(x_image)
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) #+ weights_norm
 
@@ -198,9 +198,15 @@ def main(_):
 
         sess.run(tf.global_variables_initializer())
 
-        print(sess.run(tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[0]))
-        weightDecay()
-        print(sess.run(tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[0]))
+
+        print("NEW:")
+        for i in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
+            print(i)
+        weightDecay(sess)
+        print("OLD:")
+        print(sess.run(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)))
+        for i in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
+            print(i)
 
 
         #variable to store the previous validation accuracy
@@ -306,8 +312,12 @@ def createFilterImages(sess):
 
     print("Finished creating filter images")
 
-def weightDecay():
-    tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[0] -= 100
+def weightDecay(sess):
+    #print(sess.run(tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[0]))
+    for i in range(10):
+       oldWeights = tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[i]
+       newWeights = oldWeights - 100
+       sess.run(tf.assign(tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[i], newWeights))
 
 
 def imageWhitening(image):

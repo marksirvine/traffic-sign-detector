@@ -46,7 +46,7 @@ tf.app.flags.DEFINE_integer('max-steps', 50,
 tf.app.flags.DEFINE_integer('batch-size', 100, 'Number of examples per mini-batch. (default: %(default)d)')
 tf.app.flags.DEFINE_float('learning-rate', 0.01, 'Number of examples to run. (default: %(default)d)')
 tf.app.flags.DEFINE_float('momentum', 0.9, "The momentum value used in the update rule")
-tf.app.flags.DEFINE_float('weight-decay', 1000000, "The value of the weight decay used in the update rule")
+tf.app.flags.DEFINE_float('weight-decay', 0.0001, "The value of the weight decay used in the update rule")
 
 #Image info
 IMG_WIDTH = 32
@@ -198,17 +198,6 @@ def main(_):
 
         sess.run(tf.global_variables_initializer())
 
-
-        print("NEW:")
-        for i in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
-            print(i)
-        weightDecay(sess, getCurrentWeights())
-        print("OLD:")
-        print(sess.run(getCurrentWeights()))
-        for i in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
-            print(i)
-
-
         #variable to store the previous validation accuracy
         previous_validation_accuracy = 0.0
 
@@ -218,9 +207,15 @@ def main(_):
             #perform one training epoch
             for (trainImages, trainLabels) in bg.batch_generator(data,'train'):
 
+                #save the current weights in the oldWeights variable
+                oldWeights = getCurrentWeights()
+
                 #train the CNN and get the training summary
                 _, train_summary_str = sess.run([train_step, train_summary],
                                             feed_dict={x_image: trainImages, y_: trainLabels})
+
+                #perform the weight decay
+                weightDecay(sess, oldWeights)
 
     
             # Validation: Monitoring accuracy using validation set

@@ -145,12 +145,12 @@ def main(_):
         x = tf.placeholder(tf.float32, [None, IMG_WIDTH * IMG_HEIGHT * IMG_CHANNELS])
         x_image = tf.reshape(x, [-1, IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS])
         #whitening
-        x_image = tf.map_fn(lambda image: imageWhitening(image), x_image)
+        whitenedImages = tf.map_fn(lambda image: imageWhitening(image), x_image)
         y_ = tf.placeholder(tf.float32, [None, CLASS_COUNT])
 
 
     with tf.name_scope('model'):
-        y_conv = deepnn(x_image)
+        y_conv = deepnn(whitenedImages)
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) #+ weights_norm
 

@@ -198,6 +198,10 @@ def main(_):
 
         sess.run(tf.global_variables_initializer())
 
+        print(sess.run(tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[0]))
+        weightDecay()
+        print(sess.run(tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[0]))
+
 
         #variable to store the previous validation accuracy
         previous_validation_accuracy = 0.0
@@ -301,6 +305,9 @@ def createFilterImages(sess):
         scp.misc.imsave("filters/first/" + str(a+1) + ".jpg", image)
 
     print("Finished creating filter images")
+
+def weightDecay():
+    tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[0] -= 100
 
 
 def imageWhitening(image):

@@ -202,7 +202,7 @@ def main(_):
         print("NEW:")
         for i in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
             print(i)
-        weightDecay(sess)
+        weightDecay(sess, getCurrentWeights())
         print("OLD:")
         print(sess.run(getCurrentWeights()))
         for i in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
@@ -315,11 +315,10 @@ def createFilterImages(sess):
 def getCurrentWeights():
     return tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
 
-def weightDecay(sess):
+def weightDecay(sess, oldWeights):
     #print(sess.run(tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[0]))
     for i in range(10):
-       oldWeights = getCurrentWeights()[i]
-       newWeights = oldWeights - 100
+       newWeights = oldWeights[i] - 100
        sess.run(tf.assign(tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[i], newWeights))
 
 

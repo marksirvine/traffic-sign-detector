@@ -46,7 +46,7 @@ tf.app.flags.DEFINE_integer('max-steps', 50,
 tf.app.flags.DEFINE_integer('batch-size', 100, 'Number of examples per mini-batch. (default: %(default)d)')
 tf.app.flags.DEFINE_float('learning-rate', 0.01, 'Number of examples to run. (default: %(default)d)')
 tf.app.flags.DEFINE_float('momentum', 0.9, "The momentum value used in the update rule")
-tf.app.flags.DEFINE_float('weight_decay', 0.1, "The value of the weight decay used in the update rule")
+tf.app.flags.DEFINE_float('weight-decay', 1000, "The value of the weight decay used in the update rule")
 
 #Image info
 IMG_WIDTH = 32
@@ -204,7 +204,7 @@ def main(_):
             print(i)
         weightDecay(sess)
         print("OLD:")
-        print(sess.run(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)))
+        print(sess.run(getCurrentWeights()))
         for i in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
             print(i)
 
@@ -312,10 +312,13 @@ def createFilterImages(sess):
 
     print("Finished creating filter images")
 
+def getCurrentWeights():
+    return tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+
 def weightDecay(sess):
     #print(sess.run(tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[0]))
     for i in range(10):
-       oldWeights = tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[i]
+       oldWeights = getCurrentWeights()[i]
        newWeights = oldWeights - 100
        sess.run(tf.assign(tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[i], newWeights))
 

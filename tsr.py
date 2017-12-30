@@ -207,15 +207,9 @@ def main(_):
             #perform one training epoch
             for (trainImages, trainLabels) in bg.batch_generator(data,'train'):
 
-                #save the current weights in the oldWeights variable
-                oldWeights = getCurrentWeights()
-
                 #train the CNN and get the training summary
                 _, train_summary_str = sess.run([train_step, train_summary],
                                             feed_dict={x_image: trainImages, y_: trainLabels})
-
-                #perform the weight decay
-                weightDecay(sess, oldWeights)
 
     
             # Validation: Monitoring accuracy using validation set

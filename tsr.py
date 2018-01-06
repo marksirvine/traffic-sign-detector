@@ -86,9 +86,17 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
         activation=tf.nn.relu,
         name='conv1'
     )
+
+    norm1 = tf.nn.local_response_normalization(conv1,
+                                              alpha=1e-4,
+                                              beta=0.75,
+                                              depth_radius=2,
+                                              bias=2.0)
+
+
     #3
     pool1 = tf.layers.average_pooling2d(
-        inputs=conv1,
+        inputs=norm1,
         pool_size=[3, 3],
         strides=[2,2],
         padding="same",
@@ -103,6 +111,13 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
         activation=tf.nn.relu,
         name='conv2'
     )
+
+    norm2 = tf.nn.local_response_normalization(conv2,
+                                              alpha=1e-4,
+                                              beta=0.75,
+                                              depth_radius=2,
+                                              bias=2.0)
+
     #5
     pool2 = tf.layers.average_pooling2d(
         inputs=conv2,
@@ -211,7 +226,7 @@ def main(_):
                 _, train_summary_str = sess.run([train_step, train_summary],
                                             feed_dict={x_image: trainImages, y_: trainLabels})
 
-    
+
             # Validation: Monitoring accuracy using validation set
             if (step + 1) % FLAGS.log_frequency == 0:
 
@@ -229,7 +244,7 @@ def main(_):
 
                 #calculate the average validation accuracy over all of the batches
                 validation_accuracy = validation_accuracy_sum / validation_batch_count
-              
+
                 #print the accuracy
                 print('step {}, accuracy on validation set : {}'.format(step, validation_accuracy))
 
@@ -324,7 +339,7 @@ def imageWhitening(image):
     bMean = tf.reduce_mean(bChannel)
 
     one = tf.constant(1, tf.float32)
- 
+
     #calculate the standard deviation for each channel
     rStd = tf.maximum(one, tf.contrib.keras.backend.std(rChannel))
     gStd = tf.maximum(one, tf.contrib.keras.backend.std(gChannel))

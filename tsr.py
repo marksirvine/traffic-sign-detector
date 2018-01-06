@@ -122,7 +122,7 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
 
     #5
     pool2 = tf.layers.average_pooling2d(
-        inputs=conv2,
+        inputs=norm2,
         pool_size=[3, 3],
         strides=2,
         padding='same',

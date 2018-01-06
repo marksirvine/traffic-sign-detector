@@ -87,12 +87,13 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
         name='conv1'
     )
 
-    norm1 = tf.nn.local_response_normalization(conv1,
-                                              alpha=1e-4,
-                                              beta=0.75,
-                                              depth_radius=2,
-                                              bias=2.0)
+    # norm1 = tf.nn.local_response_normalization(conv1,
+    #                                           alpha=1e-4,
+    #                                           beta=0.75,
+    #                                           depth_radius=2,
+    #                                           bias=2.0)
 
+    norm1 = tf.nn.l2_normalize(conv1, 2 ,epsilon=1e-12)
 
     #3
     pool1 = tf.layers.average_pooling2d(
@@ -112,11 +113,12 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
         name='conv2'
     )
 
-    norm2 = tf.nn.local_response_normalization(conv2,
-                                              alpha=1e-4,
-                                              beta=0.75,
-                                              depth_radius=2,
-                                              bias=2.0)
+    # norm2 = tf.nn.local_response_normalization(conv2,
+    #                                           alpha=1e-4,
+    #                                           beta=0.75,
+    #                                           depth_radius=2,
+    #                                           bias=2.0)
+    norm2 = tf.nn.l2_normalize(conv2, 2 ,epsilon=1e-12)
 
     #5
     pool2 = tf.layers.average_pooling2d(

@@ -234,7 +234,7 @@ def main(_):
                                             feed_dict={x_image: trainImages, y_: trainLabels})
 
 
-                for v in trainVariables:
+                for v in trainVariables if 'bias' not in v.name:
                     print(v)
 
             # Validation: Monitoring accuracy using validation set

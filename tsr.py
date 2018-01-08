@@ -93,11 +93,11 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
     #                                           depth_radius=2,
     #                                           bias=2.0)
 
-    norm1 = tf.nn.l2_normalize(conv1, 2 ,epsilon=1e-12)
+    # norm1 = tf.nn.l2_normalize(conv1, 2 ,epsilon=1e-12)
 
     #3
     pool1 = tf.layers.average_pooling2d(
-        inputs=norm1,
+        inputs=conv1,
         pool_size=[3, 3],
         strides=[2,2],
         padding="same",
@@ -118,11 +118,11 @@ def deepnn(x_image, img_shape=(IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), class_count
     #                                           beta=0.75,
     #                                           depth_radius=2,
     #                                           bias=2.0)
-    norm2 = tf.nn.l2_normalize(conv2, 2 ,epsilon=1e-12)
+    # norm2 = tf.nn.l2_normalize(conv2, 2 ,epsilon=1e-12)
 
     #5
     pool2 = tf.layers.average_pooling2d(
-        inputs=norm2,
+        inputs=conv2,
         pool_size=[3, 3],
         strides=2,
         padding='same',
@@ -169,6 +169,13 @@ def main(_):
     with tf.name_scope('model'):
         y_conv = deepnn(x_image)
 
+
+    trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+
+    for v in trainVariables:
+        print(v)
+    # lossL2 = tf.add_n([tf.nn.l2_loss(v) for v is trainVariables]) * 0.0005
+
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) #+ weights_norm
 
     #accuracy and error
@@ -184,7 +191,7 @@ def main(_):
     # are added as a dependency, this ensures that we update the mean and variance of the batch normalisation
     # layers
     # See https://www.tensorflow.org/api_docs/python/tf/layers/batch_normalization for more
-    trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
 

@@ -172,7 +172,8 @@ def main(_):
 
     trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
 
-    lossL2 = tf.add_n([tf.nn.l2_loss(v) for v in trainVariables]) * 0.0005
+    lossL2 = tf.add_n([tf.nn.l2_loss(v) for v in trainVariables
+                       if 'bias' not in v.name]) * 0.0005
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) + lossL2 #+ weights_norm
 
@@ -234,9 +235,9 @@ def main(_):
                                             feed_dict={x_image: trainImages, y_: trainLabels})
 
 
-                for v in trainVariables:
-                    if 'bias' not in v.name:
-                        print(v)
+                # for v in trainVariables:
+                #     if 'bias' not in v.name:
+                #         print(v)
 
             # Validation: Monitoring accuracy using validation set
             if (step + 1) % FLAGS.log_frequency == 0:

@@ -162,12 +162,12 @@ def main(_):
         x = tf.placeholder(tf.float32, [None, IMG_WIDTH * IMG_HEIGHT * IMG_CHANNELS])
         x_image = tf.reshape(x, [-1, IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS])
         #whitening
-        whitenedImages = tf.map_fn(lambda image: imageWhitening(image), x_image)
+        normalizedImages = tf.map_fn(lambda image: normalization(image), x_image)
         y_ = tf.placeholder(tf.float32, [None, CLASS_COUNT])
 
 
     with tf.name_scope('model'):
-        y_conv = deepnn(x_image)
+        y_conv = deepnn(normalizedImages)
 
 
     trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)

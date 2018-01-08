@@ -172,11 +172,9 @@ def main(_):
 
     trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
 
-    for v in trainVariables:
-        print(v)
-    # lossL2 = tf.add_n([tf.nn.l2_loss(v) for v is trainVariables]) * 0.0005
+    lossL2 = tf.add_n([tf.nn.l2_loss(v) for v is trainVariables]) * 0.0005
 
-    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) #+ weights_norm
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) + lossL2 #+ weights_norm
 
     #accuracy and error
     correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
@@ -235,6 +233,9 @@ def main(_):
                 _, train_summary_str = sess.run([train_step, train_summary],
                                             feed_dict={x_image: trainImages, y_: trainLabels})
 
+
+                for v in trainVariables:
+                    print(v)
 
             # Validation: Monitoring accuracy using validation set
             if (step + 1) % FLAGS.log_frequency == 0:

@@ -212,13 +212,15 @@ def main(_):
 
 
     #new summaries
+    loss_value = tf.placeholder(tf.float32)
     accuracy_value = tf.placeholder(tf.float32)
     error_value = tf.placeholder(tf.float32)
 
+    overall_loss_summary = tf.summary.scalar("Overall Loss", loss_value)
     overall_accuracy_summary = tf.summary.scalar("Overall Accuracy", accuracy_value)
     overall_error_summary = tf.summary.scalar("Overall Error", error_value)
 
-    overall_summary = tf.summary.merge([overall_accuracy_summary, overall_error_summary])
+    overall_summary = tf.summary.merge([overall_loss_summary, overall_accuracy_summary, overall_error_summary])
     
 
 
@@ -250,6 +252,8 @@ def main(_):
         #TRAINING AND VALIDATION
         for step in range(FLAGS.max_steps):
 
+            training_loss_sum = 0
+
             #perform one training epoch
             for (trainImages, trainLabels) in bg.batch_generator(data,'train'):
 
@@ -257,10 +261,8 @@ def main(_):
                 _, train_summary_str = sess.run([train_step, train_summary],
                                             feed_dict={x_image: trainImages, y_: trainLabels})
 
+                training_loss_sum += sess.run(cross_entropy, feed_dict={x_image: trainImages, y_: trainLabels})
 
-                # for v in trainVariables:
-                #     if 'bias' not in v.name:
-                #         print(v)
 
             # Validation: Monitoring accuracy using validation set
             if (step + 1) % FLAGS.log_frequency == 0:
@@ -280,7 +282,7 @@ def main(_):
                 #calculate the average validation accuracy over all of the batches
                 validation_accuracy = validation_accuracy_sum / validation_batch_count
 
-                overall_summary_str = sess.run(overall_summary, feed_dict={accuracy_value: validation_accuracy, error_value: (1-validation_accuracy)})
+                overall_summary_str = sess.run(overall_summary, feed_dict={loss_value: training_loss_sum, accuracy_value: validation_accuracy, error_value: (1-validation_accuracy)})
 
                 #print the accuracy
                 print('step {}, accuracy on validation set : {}'.format(step, validation_accuracy))

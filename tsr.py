@@ -253,6 +253,7 @@ def main(_):
         for step in range(FLAGS.max_steps):
 
             training_loss_sum = 0
+            training_images_count = 0
 
             #perform one training epoch
             for (trainImages, trainLabels) in bg.batch_generator(data,'train'):
@@ -261,7 +262,13 @@ def main(_):
                 _, train_summary_str = sess.run([train_step, train_summary],
                                             feed_dict={x_image: trainImages, y_: trainLabels})
 
+                
                 training_loss_sum += sess.run(cross_entropy, feed_dict={x_image: trainImages, y_: trainLabels})
+                training_images_count += len(trainImages)
+
+            average_training_loss = training_loss_sum / training_images_count
+
+            print('training image: {}'.format(training_images_count))
 
 
             # Validation: Monitoring accuracy using validation set
@@ -282,7 +289,7 @@ def main(_):
                 #calculate the average validation accuracy over all of the batches
                 validation_accuracy = validation_accuracy_sum / validation_batch_count
 
-                overall_summary_str = sess.run(overall_summary, feed_dict={loss_value: training_loss_sum, accuracy_value: validation_accuracy, error_value: (1-validation_accuracy)})
+                overall_summary_str = sess.run(overall_summary, feed_dict={loss_value: average_training_loss, accuracy_value: validation_accuracy, error_value: (1-validation_accuracy)})
 
                 #print the accuracy
                 print('step {}, accuracy on validation set : {}'.format(step, validation_accuracy))

@@ -1,0 +1,2 @@
+model_checkpoint_path: "/mnt/storage/home/gc14768/cw/logs/exp_bs_100_lr_0.01/model.ckpt-49"
+all_model_checkpoint_paths: "/mnt/storage/home/gc14768/cw/logs/exp_bs_100_lr_0.01/model.ckpt-49"

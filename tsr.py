@@ -41,7 +41,7 @@ tf.app.flags.DEFINE_integer('save-model-frequency', 1,
 tf.app.flags.DEFINE_string('log-dir', '{cwd}/logs/'.format(cwd=os.getcwd()),
                            'Directory where to write event logs and checkpoint. (default: %(default)s)')
 # Optimisation hyperparameters
-tf.app.flags.DEFINE_integer('max-steps', 10,
+tf.app.flags.DEFINE_integer('max-steps', 5,
                             'Number of mini-batches to train on. (default: %(default)d)')
 tf.app.flags.DEFINE_integer('batch-size', 100, 'Number of examples per mini-batch. (default: %(default)d)')
 tf.app.flags.DEFINE_float('learning-rate', 0.01, 'Number of examples to run. (default: %(default)d)')
@@ -210,9 +210,15 @@ def main(_):
     train_summary = tf.summary.merge([loss_summary, accuracy_summary, error_summary, learning_rate_summary, img_summary])
     validation_summary = tf.summary.merge([loss_summary, accuracy_summary, error_summary])
 
-    test = tf.placeholder(tf.float32)
-    test_summary = tf.summary.scalar("Test", test)
-    overall_summary = tf.summary.merge([test_summary])
+
+    #new summaries
+    accuracy_value = tf.placeholder(tf.float32)
+    error_value = tf.placeholder(tf.float32)
+
+    overall_accuracy_summary = tf.summary.scalar("Overall Accuracy", accuracy_value)
+    overall_error_summary = tf.summary.scalar("Overall Error", error_value)
+
+    overall_summary = tf.summary.merge([overall_accuracy_summary, overall_error_summary])
     
 
 
@@ -224,7 +230,7 @@ def main(_):
 
         train_writer = tf.summary.FileWriter(run_log_dir + "_train", sess.graph)
         validation_writer = tf.summary.FileWriter(run_log_dir + "_validation", sess.graph)
-        test_writer = tf.summary.FileWriter(run_log_dir + "_test", sess.graph)
+        overall_writer = tf.summary.FileWriter(run_log_dir + "_overall", sess.graph)
 
         sess.run(tf.global_variables_initializer())
 
@@ -274,7 +280,7 @@ def main(_):
                 #calculate the average validation accuracy over all of the batches
                 validation_accuracy = validation_accuracy_sum / validation_batch_count
 
-                test_summary_str = sess.run(test_summary, feed_dict={test: validation_accuracy})
+                overall_summary_str = sess.run(overall_summary, feed_dict={accuracy_value: validation_accuracy, error_value: (1-validation_accuracy)})
 
                 #print the accuracy
                 print('step {}, accuracy on validation set : {}'.format(step, validation_accuracy))
@@ -282,7 +288,7 @@ def main(_):
                 #add the summaries of the training and validation for tensorboard
                 train_writer.add_summary(train_summary_str, step)
                 validation_writer.add_summary(validation_summary_str, step)
-                test_writer.add_summary(test_summary_str, step)
+                overall_writer.add_summary(overall_summary_str, step)
 
                 if validation_accuracy < previous_validation_accuracy:
                     print('Accuracy dropped. Reducing learning rate.')
@@ -299,7 +305,7 @@ def main(_):
             if (step + 1) % FLAGS.flush_frequency == 0:
                 train_writer.flush()
                 validation_writer.flush()
-                test_writer.flush()
+                overall_writer.flush()
 
         #TESTING
 

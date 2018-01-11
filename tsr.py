@@ -24,6 +24,8 @@ import cPickle as pickle
 
 import scipy as scp
 
+import numpy as np
+
 data = pickle.load(open('dataset.pkl','rb'))
 
 here = os.path.dirname(__file__)
@@ -220,14 +222,13 @@ def main(_):
 
         sess.run(tf.global_variables_initializer())
 
-        #A = [[[1,2,9],[2,2,8],[3,2,7]],
-        #     [[4,2,6],[5,2,5],[6,2,4]],
-        #     [[7,2,3],[8,2,2],[9,2,1]]]
+        #A = [[[-1.5,2.5], [-1.5,2.5]],
+        #    [[1.5,2.5], [1.5,2.5]],
+        #    [[1.5,2.5], [1.5,2.5]]]
 
-        #image = tf.placeholder(tf.float32)
 
-        #new_image = normalization(image)
-        #print(sess.run(new_image, feed_dict={image: A}))
+        #print(A)
+        #print(normalizeImage(A))
 
 
         #variable to store the previous validation accuracy
@@ -346,29 +347,28 @@ def weightDecay(sess, oldWeights):
        newWeights = getCurrentWeights()[i] - FLAGS.learning_rate * FLAGS.weight_decay * oldWeights[i]
        sess.run(tf.assign(tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[i], newWeights))
 
-def normalization(image):
+def normalizeImage(image):
+    newImage = np.array(image)
+    print(newImage.shape)
 
-    #get each channel
-    rChannel = image[:,:,0]
-    gChannel = image[:,:,1]
-    bChannel = image[:,:,2]
+    #sum up the channels
+    mean = [0,0,0];
+    for i in range(newImage.shape[0]):
+        for j in range(newImage.shape[1]):
+            for k in range(newImage.shape[2]):
+                mean[k] += image[i][j][k]
 
-    #calculate the mean for each channel
-    rMean = tf.reduce_mean(rChannel)
-    gMean = tf.reduce_mean(gChannel)
-    bMean = tf.reduce_mean(bChannel)
+    #divide sum by the total number of pixels
+    for i in range(newImage.shape[2]):
+        mean[i] /= (newImage.shape[0] * newImage.shape[1])
 
-    rNormalized = rChannel - rMean
-    gNormalized = gChannel - gMean
-    bNormalized = bChannel - bMean
+    #subtract the mean from the image copy
+    for i in range(newImage.shape[0]):
+        for j in range(newImage.shape[1]):
+            for k in range(newImage.shape[2]):
+                newImage[i][j][k] -= mean[k]
 
-    rNormalized = tf.stack([rNormalized],2)
-    gNormalized = tf.stack([gNormalized],2)
-    bNormalized = tf.stack([bNormalized],2)
-
-    new_image = tf.concat([rNormalized, gNormalized, bNormalized],2)
-
-    return new_image
+    return newImage
 
 
 def imageWhitening(image):

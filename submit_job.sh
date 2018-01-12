@@ -11,6 +11,5 @@
 #SBATCH --mail-user=<ab12345>@bristol.ac.uk # Email to which notifications will be sent                                                                
 
 module add libs/tensorflow/1.2
-rm -r logs/
 srun python tsr.py
 wait

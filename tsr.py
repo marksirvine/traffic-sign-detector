@@ -174,7 +174,7 @@ def main(_):
     trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
 
     lossL2 = tf.add_n([tf.nn.l2_loss(v) for v in trainVariables
-                       if 'bias' not in v.name]) * 0.0005
+                       if 'bias' not in v.name]) * 0.0001
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)) #+ weights_norm
     cross_entropy = cross_entropy + lossL2;

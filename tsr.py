@@ -24,6 +24,8 @@ import cPickle as pickle
 
 import scipy as scp
 
+import numpy as np
+
 data = pickle.load(open('dataset.pkl','rb'))
 
 here = os.path.dirname(__file__)
@@ -166,7 +168,7 @@ def main(_):
 
 
     with tf.name_scope('model'):
-        y_conv = deepnn(normalizedImages)
+        y_conv = deepnn(x_image)
 
 
     trainVariables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
@@ -194,9 +196,6 @@ def main(_):
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
 
-        #apply the weight decay
-        #regularizer = tf.contrib.layers.l2_regularizer(scale=FLAGS.weight_decay)
-        #tf.contrib.layers.apply_regularization(regularizer, trainVariables)
         #train using momentum
         train_step = tf.train.MomentumOptimizer(FLAGS.learning_rate, FLAGS.momentum).minimize(cross_entropy,global_step=global_step)
 
@@ -226,15 +225,7 @@ def main(_):
 
         sess.run(tf.global_variables_initializer())
 
-        #A = [[[1,2,9],[2,2,8],[3,2,7]],
-        #     [[4,2,6],[5,2,5],[6,2,4]],
-        #     [[7,2,3],[8,2,2],[9,2,1]]]
-
-        #image = tf.placeholder(tf.float32)
-
-        #new_image = normalization(image)
-        #print(sess.run(new_image, feed_dict={image: A}))
-
+        whitening()
 
         #variable to store the previous validation accuracy
         previous_validation_accuracy = 0.0
@@ -357,14 +348,6 @@ def createFilterImages(sess):
 
     print("Finished creating filter images")
 
-def getCurrentWeights():
-    return tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-
-def weightDecay(sess, oldWeights):
-    #print(sess.run(tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[0]))
-    for i in range(10):
-       newWeights = getCurrentWeights()[i] - FLAGS.learning_rate * FLAGS.weight_decay * oldWeights[i]
-       sess.run(tf.assign(tf.get_collection_ref(tf.GraphKeys.TRAINABLE_VARIABLES)[i], newWeights))
 
 def normalization(image):
 
@@ -389,6 +372,66 @@ def normalization(image):
     new_image = tf.concat([rNormalized, gNormalized, bNormalized],2)
 
     return new_image
+
+def whitening():
+  
+    rChannel = []
+    gChannel = []
+    bChannel = []
+
+    for i in range(len(data[0])): 
+        for j in range(IMG_WIDTH):
+            for k in range(IMG_HEIGHT):
+                rChannel.append(data[0][i][0][j][k][0])
+                gChannel.append(data[0][i][0][j][k][1])
+                bChannel.append(data[0][i][0][j][k][2])
+
+    print("Separated the colour channels")
+
+    #calculate means
+    rMean = np.mean(rChannel)
+    print("Calculated r channel mean: {}".format(rMean))
+    gMean = np.mean(gChannel)
+    print("Calculated g channel mean: {}".format(gMean))
+    bMean = np.mean(bChannel)
+    print("Calculated b channel mean: {}".format(bMean))
+
+    #calculate standard deviations
+    rStd = np.std(rChannel)
+    print("Calculated r channel standard deviation: {}".format(rStd))
+    gStd = np.std(gChannel)
+    print("Calculated g channel standard deviation: {}".format(gStd))
+    bStd = np.std(bChannel)
+    print("Calculated b channel standard deviation: {}".format(bStd))
+
+    #perform the whitening
+    for i in range(len(data[0])):
+        for j in range(IMG_WIDTH):
+            for k in range(IMG_HEIGHT):
+                data[0][i][0][j][k][0] -= rMean
+                data[0][i][0][j][k][1] -= gMean
+                data[0][i][0][j][k][2] -= bMean
+                if(rStd > 0):
+                    data[0][i][0][j][k][0] = data[0][i][0][j][k][0] / rStd
+                if(gStd > 0):
+                    data[0][i][0][j][k][1] = data[0][i][0][j][k][1] / gStd
+                if(bStd > 0):
+                    data[0][i][0][j][k][2] = data[0][i][0][j][k][2] / bStd
+
+    for i in range(len(data[1])):
+        for j in range(IMG_WIDTH):
+            for k in range(IMG_HEIGHT):
+                data[1][i][0][j][k][0] -= rMean
+                data[1][i][0][j][k][1] -= gMean
+                data[1][i][0][j][k][2] -= bMean
+                if(rStd > 0):
+                    data[1][i][0][j][k][0] = data[1][i][0][j][k][0] / rStd
+                if(gStd > 0):
+                    data[1][i][0][j][k][1] = data[1][i][0][j][k][1] / gStd
+                if(bStd > 0):
+                    data[1][i][0][j][k][2] = data[1][i][0][j][k][2] / bStd
+
+    print("Whitening complete")
 
 
 def imageWhitening(image):

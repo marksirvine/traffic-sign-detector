@@ -8,6 +8,7 @@ A tensorflow implementation of the traffic sign detector outlined by Zhang et al
 
 * TensorFlow
 * Python 2.7, cPickle, scipy, numpy
+* CIFAR10 Dataset for training
 * If using a GPU (recommended), all the required NVIDIA software to run TF on a GPU (cuda, etc).
 
 

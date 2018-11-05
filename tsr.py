@@ -1,15 +1,3 @@
-############################################################
-#                                                          #
-#  Code for Lab 3: Data Augmentation and Debugging Strat.  #
-#                                                          #
-############################################################
-
-"""Based on TensorFLow's tutorial: A deep MNIST classifier using convolutional layers.
-
-See extensive documentation at
-https://www.tensorflow.org/get_started/mnist/pros
-"""
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -212,7 +200,7 @@ def main(_):
     overall_error_summary = tf.summary.scalar("Overall Error", error_value)
 
     overall_summary = tf.summary.merge([overall_training_loss_summary, overall_validation_loss_summary, overall_accuracy_summary, overall_error_summary])
-    
+
 
 
     #create saver to save checkpoints
@@ -374,12 +362,12 @@ def normalization(image):
     return new_image
 
 def whitening():
-  
+
     rChannel = []
     gChannel = []
     bChannel = []
 
-    for i in range(len(data[0])): 
+    for i in range(len(data[0])):
         for j in range(IMG_WIDTH):
             for k in range(IMG_HEIGHT):
                 rChannel.append(data[0][i][0][j][k][0])

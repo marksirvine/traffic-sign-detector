@@ -1,1 +1,0 @@
-../tensorboard/bazel-bin/tensorboard/tensorboard --logdir logs/

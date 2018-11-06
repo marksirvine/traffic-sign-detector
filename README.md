@@ -4,7 +4,7 @@ A tensorflow implementation of the traffic sign detector outlined by Zhang et al
 
 
 
-## Dependencies 
+## Requirements 
 
 * TensorFlow
 * Python 2.7, cPickle, scipy, numpy

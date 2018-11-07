@@ -14,7 +14,7 @@ A tensorflow implementation of the traffic sign detector outlined by Zhang et al
 
 ## Status
 
-Currently achiving an accuracy of 90.13%.
+Currently achieving an accuracy of 90.13%.
 
 
 ## Authors
